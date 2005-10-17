@@ -1,0 +1,25 @@
+/*
+                                ChangeLog
+
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+*       Part of:        WeightWatcher
+*
+*       Author:         E. BERTIN (IAP)
+*
+*       Contents:       log of changes made to the WeightWatcher source code
+*
+*       Last modify:    26/08/2005
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+
+Who     When            Where(mostly)   What
+
+EB      13/01/2003      -               Added ChangeLog
+
+EB      11/12/2004      -               New RPM build system
+                        main()          New display.
+EB      12/01/2005      -               New POLY_OUTWEIGHTS option.
+                        newvec()        Added support for ds9 3.0 polygons
+EB      26/08/2005      doc             Updated doc for new web-page.
