@@ -1,3 +1,6 @@
+Sep 2005: Chiara V1.7.01 trying to solve some problems for MEF .reg files
+	  Bug fixed. Only ds9 3.0 syntax is accepted!!!!
+
 Jan 2005: V1.7
         - Support for ds9 3.0 polygons
 

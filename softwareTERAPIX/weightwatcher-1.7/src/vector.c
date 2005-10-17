@@ -85,16 +85,24 @@ vecstruct	*newvec(char *filename)
     if (strstr(str, "tile"))
       {
       str2=strtok(str, vectok);
-      ext=atoi(strtok(NULL, vectok));
-      str2=strtok(NULL, vectok);	/* Skip "image" or whatever */
+      ext=atoi(strtok(NULL, vectok))-1;
+      str2 = strtok(NULL, vectok);
       }
     else
+      {
       ext = 0;
-    if (!(str2=strstr(str, "polygon")))
-      if (!(str2=strstr(str, "POLYGON")))
-        continue;
+      str2=strtok(str, vectok);
+      }
 
-    strtok(str2, vectok);
+    if (strstr(str2,"image"))
+      {
+      if (!(strstr(strtok(NULL, vectok), "polygon")))
+	continue;
+      }
+    else
+      continue;
+
+      
 
 /*-- Decode the POLYGON information as a set of segments */
     npoly++;
@@ -116,6 +124,7 @@ vecstruct	*newvec(char *filename)
         error(EXIT_FAILURE, "Malformed POLYGON in ", vector->filename);
       seg->y1 = (seg-1)->y2 = atof(str2) - 1.0;	/* 1st pixel is "1" in FITS */
       seg->ext = ext;
+      seg0->ext = ext;
       }
 
 /*-- POLYGONs are closed figures */

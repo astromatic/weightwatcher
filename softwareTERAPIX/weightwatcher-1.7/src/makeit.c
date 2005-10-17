@@ -96,7 +96,6 @@ void	makeit(void)
     if (vector->ofmask > maxbit)
       maxbit = vector->ofmask;
     }
-
   for (ext=0; ext<next; ext++)
 /* Open weight images */
     {
