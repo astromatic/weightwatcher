@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.7.01, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.7.02, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_CONFIG_HEADER(config.h)
@@ -20,7 +20,6 @@ AC_SUBST(DATE2, "$date2")
 AC_SUBST(DATE3, "$date3")
 
 # Include macros
-#sinclude(acx_pthread.m4)
 sinclude(acx_prog_cc_optim.m4)
 
 # Display pakage and version number
