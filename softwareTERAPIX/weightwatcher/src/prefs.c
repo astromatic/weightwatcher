@@ -375,7 +375,7 @@ void	useprefs(void)
   {
    unsigned short	ashort=1;
    char			*pstr;
-   int			i,j, weight_flag;
+   int			t,i,j, weight_flag;
 
 
 /* Test if byteswapping will be needed */

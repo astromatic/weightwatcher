@@ -52,6 +52,10 @@ typedef struct
   int		nflag_ofmask;				/* number of params */
   char		*oweight_name;				/* output WEIGHT */
   char		*oflag_name;				/* output FLAG */
+
+  char          *getarea;                               /* compute area? */
+  FLAGTYPE      geta_flags[MAXNIMAGE];                  /* flags for area */
+  int           ngeta_flags;                            /* number of params */
   int		mem_bufsize;				/* # of buffer lines */
 
   enum	{QUIET, NORM, FULL}		verbose_type;	/* display type */

@@ -39,13 +39,14 @@ void	makeit(void)
    picstruct	**wfield, **ffield, *field, *owfield, *offield;
    PIXTYPE	*pix, *pixin, *owstrip,
 		val, threshd,threshu;
-   FLAGTYPE	*flagin, *flag,
+   FLAGTYPE	*flagin, *flag, flagmask,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, fmask,wmask,fval, maxbit;
-   int		i,j, width, height, padsize, ext, next, ntab;
+   int		i,j, t, width, height, padsize, ext, next, ntab;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*intpix, *contextbuf;
+   long         a;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
 
@@ -302,6 +303,18 @@ void	makeit(void)
 /*---- Convert the FLAG 32bits data to the output buffer (8,16 or 32 bits) */
       if (offield)
         {
+	  if (prefs.getarea)
+	    {
+	      /* Computing area having flag */
+	      a=0;
+	      for (t=0;t<prefs.ngeta_flags;t++)
+		flagmask += prefs.geta_flags[t];
+	      flag = (FLAGTYPE *)offield->strip;
+	      for (npix = spoonful; npix--;)
+		a += ((*(flag++)&flagmask)!=0);
+	      printf ("%d %ld %d\n",height*width,a,flagmask);
+	    }
+
         if (offield->bitpix!=BP_LONG)
           {
           flag = (FLAGTYPE *)offield->strip;
