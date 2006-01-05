@@ -5,11 +5,11 @@
 *
 *       Part of:        WeightWatcher
 *
-*       Author:         E.BERTIN (IAP)
+*       Authors:         E.BERTIN & C.MARMO (IAP)
 *
 *       Contents:       Main program
 *
-*       Last modify:    27/08/2005
+*       Last modify:    05/01/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -46,7 +46,8 @@ void	makeit(void)
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*intpix, *contextbuf;
-   long         a;
+   unsigned long area;
+   double       farea;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
 
@@ -208,6 +209,13 @@ void	makeit(void)
     NFPRINTF(OUTPUT, "Processing...");
     cumspoon = 0;
     spoonful = stripsize;
+    if (prefs.getarea)
+      {
+	area=0;
+	flagmask = 0;
+	for (t=0;t<prefs.ngeta_flags;t++)
+	  flagmask += prefs.geta_flags[t];
+      }
     for (; bowl; bowl -= spoonful)
       {
       if (spoonful>bowl)
@@ -306,13 +314,9 @@ void	makeit(void)
 	  if (prefs.getarea)
 	    {
 	      /* Computing area having flag */
-	      a=0;
-	      for (t=0;t<prefs.ngeta_flags;t++)
-		flagmask += prefs.geta_flags[t];
 	      flag = (FLAGTYPE *)offield->strip;
 	      for (npix = spoonful; npix--;)
-		a += ((*(flag++)&flagmask)!=0);
-	      printf ("%d %ld %d\n",height*width,a,flagmask);
+		area += ((*(flag++)&flagmask)!=0);
 	    }
 
         if (offield->bitpix!=BP_LONG)
@@ -375,6 +379,20 @@ void	makeit(void)
     free(charpix);
     }
 
+  if (prefs.getarea)
+    {
+    NPRINTF(OUTPUT, "\n \n");
+    NPRINTF(OUTPUT, "> Pixels flagged as ");
+    for (t=0;t<prefs.ngeta_flags-1;t++)
+      NPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
+    NPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
+    NPRINTF(OUTPUT, "= %ld\n",area);
+    NPRINTF(OUTPUT, "> Total number of pixels = %ld\n",width*height);
+    farea = (double)(area)/(double)(width*height);
+    NPRINTF(OUTPUT, "> Fraction of pixels flagged = %e\n",farea);
+    NPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",1-farea);
+    NPRINTF(OUTPUT, "\n");
+    }
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)
     endvec(vec[i]);
