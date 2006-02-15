@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	12/01/2005
+*	Last modify:	13/02/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -125,6 +125,8 @@ vecstruct	*newvec(char *filename)
       seg->y1 = (seg-1)->y2 = atof(str2) - 1.0;	/* 1st pixel is "1" in FITS */
       seg->ext = ext;
       seg0->ext = ext;
+      seg->ord = npoly;
+      seg0->ord = seg->ord;
       }
 
 /*-- POLYGONs are closed figures */
@@ -171,8 +173,8 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
    PIXTYPE	*pixbuf,
 		weight;
    float	y;
-   int		*cbt,
-		i, x,w,yh, pendown;
+   int		*cbt, *ns,
+		i,j, x,w,yh, pendown, tt;
 
   w = field->width;
   yh = bufsize/w;
@@ -185,22 +187,38 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
     {
     seg = vector->segment;
 /*-- Clean past history */
-    memset(contextbuf, 0, w*sizeof(int));
+    /* memset(contextbuf, 0, w*sizeof(int)); */
+    QCALLOC(contextbuf,int,w);
 /*-- Find segments that intersect the current scanline */
+    QCALLOC(ns,int,vector->nsegment);
+    tt=0;
     for (i=vector->nsegment; i--; seg++)
       if (seg->ext==ext)
-        {
-        if ((y>seg->y1)^(y>seg->y2))
+	if ((y>seg->y1)^(y>seg->y2))
           {
+	  ns[i] = seg->ord;
           x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
 /*-------- Pile cases where intersection is at the left of the frame ... */
           if (x<0)
             x = 0;
 /*-------- ...and forget those where intersection is at the right */
+	   printf("before %d %d %d\n",x, y, contextbuf[x]);
           if (x<w)
-            contextbuf[x] ^= 1;	/* XOR enable us to handle x<0 cases */
+	    {
+	    for (j=0; j<i; j++)
+	      {
+	      if (ns[i]!=ns[j])
+		/*contextbuf[x] ^= 1; XOR enable us to handle x<0 cases */
+		contextbuf[x]++;
+	      else
+		contextbuf[x]--;
+	      contextbuf[x] += tt;
+	      tt = contextbuf[x];
+	      }
+	    }
+	   printf("after %d %d %d %d\n",x, y, contextbuf[x],tt);
           }
-        }
+      
 
     cbt = contextbuf;
     pendown = 0;
@@ -210,7 +228,10 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
       for (i=w; i--; flagbuf++)
         {
         if (*(cbt++))
-          pendown ^= 1;
+	  {
+          pendown ^= 1;          
+	  /* printf("%d %d\n",cbt,pendown); */
+	  } 
         if (pendown)
           *flagbuf |= ofmask;
         }

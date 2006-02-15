@@ -9,7 +9,7 @@
 *
 *	Contents:	Vector structures.
 *
-*	Last modify:	12/01/2005
+*	Last modify:	13/02/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -39,6 +39,7 @@ typedef struct vec
 typedef struct seg
   {
   int		ext;			/* Image extension */
+  int           ord;                    /* Id number of vector */
   float		x1,y1;			/* Coords of segment's 1st point */
   float		x2,y2;			/* Coords of segment's 2nd point */
   float		slope;			/* (x2-x1)/(y2-y1) */
