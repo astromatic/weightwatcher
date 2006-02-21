@@ -196,30 +196,29 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
       if (seg->ext==ext)
 	if ((y>seg->y1)^(y>seg->y2))
           {
-	  ns[i] = seg->ord;
           x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
+	  ns[i] = seg->ord;
 /*-------- Pile cases where intersection is at the left of the frame ... */
           if (x<0)
             x = 0;
 /*-------- ...and forget those where intersection is at the right */
-	   printf("before %d %d %d\n",x, y, contextbuf[x]);
           if (x<w)
 	    {
-	    for (j=0; j<i; j++)
+	    for (j=vector->nsegment; j>i; j--)
 	      {
-	      if (ns[i]!=ns[j])
-		/*contextbuf[x] ^= 1; XOR enable us to handle x<0 cases */
-		contextbuf[x]++;
-	      else
-		contextbuf[x]--;
-	      contextbuf[x] += tt;
-	      tt = contextbuf[x];
+	      if (ns[j])
+		if (ns[i]!=ns[j])
+		  tt++;
+		else
+		  tt--;
+	      /* printf("%d %d %d\n",j,i,tt); */
 	      }
+	    if(tt)
+	      contextbuf[x] |= 1;
+	    else
+	      contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
 	    }
-	   printf("after %d %d %d %d\n",x, y, contextbuf[x],tt);
           }
-      
-
     cbt = contextbuf;
     pendown = 0;
     if (field->flags & FLAG_FIELD)
