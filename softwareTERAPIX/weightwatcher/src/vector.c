@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP)
+*	Author:		E.BERTIN (IAP) C. MARMO (IAP)
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	13/02/2006
+*	Last modify:	24/02/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -219,11 +219,12 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
       {
       for (i=w; i--; flagbuf++)
         {
-	  /* printf("%d %d\n",i,tt); */
-	  tt=0;
+	  /* tt=0;
+	     printf("%d %d %d\n",i,*cbt,tt); */
 	if (*(cbt++))
 	  {
-          for (j=w;j--;1)
+	    /* tt++;
+          for (j=w; j--; 1)
 	    {
 	      if (ns[j])
 		{
@@ -232,10 +233,9 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
 		else
 		  tt++;
 		}
-	    }
-	  /* printf("%d %d\n",i,tt); */
+		} */
 	  /* printf("%d\n",tt); */
-	  if(tt)
+	  /* if(tt) */
 	    pendown ^= 1;          
 	  /* printf("%d %d\n",cbt,pendown); */
 	  } 
@@ -255,7 +255,8 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
         }
       }
     }
-
+  free(contextbuf);
+  free(ns);
   return;
   }
 
