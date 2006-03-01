@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP)
+*	Author:		E.BERTIN (IAP) C. MARMO (IAP)
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	12/01/2005
+*	Last modify:	1/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -43,6 +43,7 @@ typedef struct
   FLAGTYPE	vec_mask[MAXNIMAGE];			/* POLY flags */
   int		nvec_mask;				/* number of params */
   double	vec_weight[MAXNIMAGE];			/* POLY weights */
+  char          *intersec;                              /* flag intersection?*/
   int		nvec_weight;				/* number of params */
   FLAGTYPE	flag_wmask[MAXNIMAGE];			/* FLAG weight-mask */
   int		nflag_wmask;				/* number of params */

@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	24/02/2006
+*	Last modify:	01/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -105,7 +105,6 @@ vecstruct	*newvec(char *filename)
       
 
 /*-- Decode the POLYGON information as a set of segments */
-    npoly++;
     seg0 = seg;
     while(1)
       {
@@ -124,14 +123,15 @@ vecstruct	*newvec(char *filename)
         error(EXIT_FAILURE, "Malformed POLYGON in ", vector->filename);
       seg->y1 = (seg-1)->y2 = atof(str2) - 1.0;	/* 1st pixel is "1" in FITS */
       seg->ext = ext;
-      seg0->ext = seg->ext;
-      seg->ord = npoly;
-      seg0->ord = seg->ord;
+      seg->poly = npoly;
       }
 
 /*-- POLYGONs are closed figures */
     seg0->x1 = seg->x1;
     seg0->y1 = seg->y1;
+    seg0->ext = ext;
+    seg0->poly = npoly;
+    npoly++;
     }
 
 /* We now have all the points: forget the last "segment" */
@@ -143,6 +143,7 @@ vecstruct	*newvec(char *filename)
 
 /* Save memory */
   vector->nsegment = nseg;
+  vector->npoly = npoly;
   if (nseg && nseg<vector->nsegment)
     {
     QREALLOC(vector->segment, segstruct, vector->nsegment);
@@ -168,13 +169,13 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
 		int bufsize, int *contextbuf, int ext)
 
   {
-   segstruct	*seg;
+   segstruct	*seg, *segpoly;
    FLAGTYPE	*flagbuf, ofmask;
    PIXTYPE	*pixbuf,
 		weight;
    float	y;
-   int		*cbt, *ns,
-		i,j, tt, x, w, yh, pendown;
+   int		*cbt, *orbuf, *obt,
+		i, p,x, w, yh, pendown, nsegpoly,nsegpoly2;
 
   w = field->width;
   yh = bufsize/w;
@@ -182,17 +183,29 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
   flagbuf = (FLAGTYPE *)field->strip;
   pixbuf = (PIXTYPE *)field->strip;
   weight = vector->weight;
-/* Scan each line */
+  QMALLOC(orbuf, int, w);
+/*---- Scan each line */
   for (y = (float)bufpos/w; yh--; y += 1.0)
     {
-    seg = vector->segment;
-/*-- Clean past history */
-    /* memset(contextbuf, 0, w*sizeof(int)); */
-    QCALLOC(contextbuf,int,w);
-    QCALLOC(ns,int,w);
-/*-- Find segments that intersect the current scanline */
-    for (i=vector->nsegment; i--; seg++)
-      if (seg->ext==ext)
+    memset(orbuf, 0, w*sizeof(int));
+/*-- For each polygon */
+    segpoly = vector->segment;
+    nsegpoly = 0;
+    nsegpoly2 = vector->nsegment;
+    for (p=0; p<vector->npoly; p++)
+      {
+      segpoly += nsegpoly;
+      nsegpoly = 0;
+      for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
+        nsegpoly++;
+      nsegpoly2++;
+      if (segpoly->ext != ext)
+        continue;
+      seg = segpoly;
+/*---- Clean past history */
+      memset(contextbuf, 0, w*sizeof(int));
+/*---- Find segments that intersect the current scanline */
+      for (i=nsegpoly; i--; seg++)
 	if ((y>seg->y1)^(y>seg->y2))
           {
           x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
@@ -201,62 +214,51 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
             x = 0;
 /*-------- ...and forget those where intersection is at the right */
           if (x<w)
-	    {
-	    ns[x] = seg->ord;
 	    contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
-	    }
           }
+/*---- "Integrate" contextbuf */
+      cbt = contextbuf;
+      obt = orbuf;
+      pendown = 0;
 
+/*---- polygon intersection are flagged */
+      if(prefs.intersec)
+        for (i=w; i--; obt++)
+          {
+          if ((*(cbt++)))
+            pendown ^= 1;          
+          *obt |= pendown; /* OR option */
+          }
+/*---- polygon intersection are NOT flagged */
+      else
+        for (i=w; i--; obt++)
+          {
+          if ((*(cbt++)))
+            pendown ^= 1;          	
+	  *obt ^= pendown; /*  XOR option */
+	  }
 
+      }
 
-    cbt = contextbuf;
-    pendown = 0;
-
-
-
+    obt = orbuf;
     if (field->flags & FLAG_FIELD)
 /*---- First case: update a flag map */
       {
       for (i=w; i--; flagbuf++)
-        {
-	  /* tt=0;
-	     printf("%d %d %d\n",i,*cbt,tt); */
-	if (*(cbt++))
-	  {
-	    /* tt++;
-          for (j=w; j--; 1)
-	    {
-	      if (ns[j])
-		{
-		if (ns[i]==ns[j])
-		  tt--;
-		else
-		  tt++;
-		}
-		} */
-	  /* printf("%d\n",tt); */
-	  /* if(tt) */
-	    pendown ^= 1;          
-	  /* printf("%d %d\n",cbt,pendown); */
-	  } 
-        if (pendown)
+        if ((*(obt++)))
           *flagbuf |= ofmask;
-        }
       }
     else
-/*---- Second case: update a weight map */
+/*--- Second case: update a weight map */
       {
       for (i=w; i--; pixbuf++)
-        {
-        if (*(cbt++))
-          pendown ^= 1;
-        if (pendown)
+        if ((*(obt++)))
           *pixbuf *= weight;
-        }
       }
     }
-  free(contextbuf);
-  free(ns);
+
+  free(orbuf);
+
   return;
   }
 

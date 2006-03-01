@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP, Leiden observatory & ESO)
+*	Author:		E.BERTIN (IAP, Leiden observatory & ESO) C. MARMO (IAP)
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	12/01/2005
+*	Last modify:	1/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -43,6 +43,8 @@ pkeystruct key[] =
     {""}, 0, MAXLIST, &prefs.nvec_mask},
   {"POLY_OUTWEIGHTS", P_FLOATLIST, prefs.vec_weight, 0,0,0.0,BIG,
     {""}, 0, MAXLIST, &prefs.nvec_weight},
+  {"POLY_INTERSECT", P_BOOL, &prefs.intersec, 0, 0,0.0,0.0,
+    {""}, 1, 1, &idummy},
   {"OUTWEIGHT_NAME", P_STRINGLIST, &prefs.oweight_name, 0,0,0.0,0.0,
     {""},0,1, &idummy},
   {"OUTFLAG_NAME", P_STRINGLIST, &prefs.oflag_name, 0,0,0.0,0.0,
@@ -87,6 +89,7 @@ char *default_prefs[] =
 "POLY_NAMES      \"\"              # Filename(s) of input DS9/SAOimage regions",
 "POLY_OUTFLAGS                   # FLAG values for polygon masks",
 "POLY_OUTWEIGHTS 0.0             # Weight values for polygon masks",
+"POLY_INTERSECT   Y              # Do you want to flag polygon intersections?",
 " ",
 "#---------------------------------- Output ------------------------------------",
 " ",

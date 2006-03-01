@@ -9,7 +9,7 @@
 *
 *	Contents:	Vector structures.
 *
-*	Last modify:	13/02/2006
+*	Last modify:	01/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -31,15 +31,16 @@ typedef struct vec
   FILE		*file;			/* FILE structure */
   struct seg	*segment;		/* Ptr to an array of line segments */
   int		nsegment;		/* Number of line segments */
+    int		npoly;			/* Number of polygons involved */
   FLAGTYPE	ofmask;			/* Bit-mask to be OR'ed in output */
-  PIXTYPE	weight;			/* Weight factor to be applied to weight-map */
+  PIXTYPE	weight;			/* Weight factor applied to weightmap*/
   }	vecstruct;
 
 /* Line segment */
 typedef struct seg
   {
   int		ext;			/* Image extension */
-  int           ord;                    /* Id number of vector */
+  int           poly;                   /* Id number of current polygon */
   float		x1,y1;			/* Coords of segment's 1st point */
   float		x2,y2;			/* Coords of segment's 2nd point */
   float		slope;			/* (x2-x1)/(y2-y1) */
