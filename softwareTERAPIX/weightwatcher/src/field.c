@@ -111,6 +111,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     fitswrite(field->fitshead, "SOFTDATE", DATE, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTAUTH", COPYRIGHT, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTINST", INSTITUTE, H_STRING, T_STRING);
+
 /*-- Neutralize possible scaling factors */
     dval = 1.0; fitswrite(field->fitshead, "BSCALE  ",&dval,H_FLOAT,T_DOUBLE);
     dval = 0.0; fitswrite(field->fitshead, "BZERO   ",&dval,H_FLOAT,T_DOUBLE);

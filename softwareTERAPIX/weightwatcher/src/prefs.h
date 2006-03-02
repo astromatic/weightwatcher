@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	1/03/2006
+*	Last modify:	2/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -53,8 +53,8 @@ typedef struct
   int		nflag_ofmask;				/* number of params */
   char		*oweight_name;				/* output WEIGHT */
   char		*oflag_name;				/* output FLAG */
-
   char          *getarea;                               /* compute area? */
+  float         weightlim;                              /* weight limit for area */
   FLAGTYPE      geta_flags[MAXNIMAGE];                  /* flags for area */
   int           ngeta_flags;                            /* number of params */
   int		mem_bufsize;				/* # of buffer lines */

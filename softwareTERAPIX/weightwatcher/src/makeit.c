@@ -9,7 +9,7 @@
 *
 *       Contents:       Main program
 *
-*       Last modify:    05/01/2006
+*       Last modify:    02/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -29,6 +29,7 @@
 #include "field.h"
 #include "prefs.h"
 #include "vector.h"
+#include "readimage.h"
 
 /********************************** makeit ***********************************/
 void	makeit(void)
@@ -37,17 +38,17 @@ void	makeit(void)
    tabstruct	*tab;
    vecstruct	**vec, *vector;
    picstruct	**wfield, **ffield, *field, *owfield, *offield;
-   PIXTYPE	*pix, *pixin, *owstrip,
+   PIXTYPE	*pix, *pixin, *owstrip, *weight,
 		val, threshd,threshu;
-   FLAGTYPE	*flagin, *flag, flagmask,
+   FLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
-		nofmask, fmask,wmask,fval, maxbit;
+		nofmask, flagmask, fmask,wmask,fval, maxbit;
    int		i,j, t, width, height, padsize, ext, next, ntab;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
-   int		*intpix, *contextbuf;
-   unsigned long area;
-   double       farea;
+   int		*contextbuf;
+   unsigned long area, area0;
+   double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
 
@@ -211,10 +212,11 @@ void	makeit(void)
     spoonful = stripsize;
     if (prefs.getarea)
       {
-	area=0;
-	flagmask = 0;
-	for (t=0;t<prefs.ngeta_flags;t++)
-	  flagmask += prefs.geta_flags[t];
+      area = 0;
+      area0 =0;
+      flagmask = 0;
+      for (t=0;t<prefs.ngeta_flags;t++)
+        flagmask += prefs.geta_flags[t];
       }
     for (; bowl; bowl -= spoonful)
       {
@@ -313,10 +315,15 @@ void	makeit(void)
         {
 	  if (prefs.getarea)
 	    {
-	      /* Computing area having flag */
-	      flag = (FLAGTYPE *)offield->strip;
-	      for (npix = spoonful; npix--;)
-		area += ((*(flag++)&flagmask)!=0);
+	    /* Computing area having flag on flag image*/
+	    flag = (FLAGTYPE *)offield->strip;
+	    for (npix = spoonful; npix--;)
+	      area += ((*(flag++)&flagmask)!=0);
+
+	    /* Computing area having zeroes on weight image*/
+	    weight = (PIXTYPE *)owfield->strip;
+	    for (npix = spoonful; npix--;)
+	      area0 += ((*(weight++))>prefs.weightlim);
 	    }
 
         if (offield->bitpix!=BP_LONG)
@@ -360,6 +367,22 @@ void	makeit(void)
     free(ffield);
 
 /*-- Pad the written FITS files */
+    if (prefs.getarea)
+      {
+      FPRINTF(OUTPUT, "\n \n");
+      FPRINTF(OUTPUT, "> Total number of pixels = %d\n",width*height);
+      FPRINTF(OUTPUT, "> Pixels flagged as ");
+      for (t=0;t<prefs.ngeta_flags-1;t++)
+	FPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
+      FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
+      FPRINTF(OUTPUT, "= %ld\n",area);
+      farea = (double)(area)/(double)(width*height);
+      FPRINTF(OUTPUT, "> Fraction of pixels flagged = %e\n",farea);
+      FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",1-farea);
+      farea0 = (double)(area0)/(double)(width*height);
+      FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
+      FPRINTF(OUTPUT, "\n");
+      }
     NFPRINTF(OUTPUT, "Closing files...");
     QCALLOC(charpix, char, FBSIZE);
     if (owfield)
@@ -379,20 +402,6 @@ void	makeit(void)
     free(charpix);
     }
 
-  if (prefs.getarea)
-    {
-    NPRINTF(OUTPUT, "\n \n");
-    NPRINTF(OUTPUT, "> Pixels flagged as ");
-    for (t=0;t<prefs.ngeta_flags-1;t++)
-      NPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
-    NPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
-    NPRINTF(OUTPUT, "= %ld\n",area);
-    NPRINTF(OUTPUT, "> Total number of pixels = %ld\n",width*height);
-    farea = (double)(area)/(double)(width*height);
-    NPRINTF(OUTPUT, "> Fraction of pixels flagged = %e\n",farea);
-    NPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",1-farea);
-    NPRINTF(OUTPUT, "\n");
-    }
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)
     endvec(vec[i]);

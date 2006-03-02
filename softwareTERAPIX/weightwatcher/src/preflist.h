@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	1/03/2006
+*	Last modify:	02/03/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -51,7 +51,9 @@ pkeystruct key[] =
     {""},0,1, &idummy},
   {"GETAREA", P_BOOL , &prefs.getarea, 0, 0, 0.0, 0.0,
     {""}, 1, 1, &idummy},
-  {"GETAREA_FLAGS", P_INTLIST , &prefs.geta_flags, 0,1<<30 , 0.0, 0.0,
+  {"GETAREA_WEIGHT", P_FLOAT , &prefs.weightlim, 0,0, -BIG, BIG, 
+    {""}, 1, 1, &idummy},
+  {"GETAREA_FLAGS", P_INTLIST , prefs.geta_flags, 0,1<<30 , 0.0, 0.0,
     {""}, 0, MAXLIST, &prefs.ngeta_flags},
   {"MEMORY_BUFSIZE", P_INT, &prefs.mem_bufsize, 1,1<<30},
   {"VERBOSE_TYPE", P_KEY, &prefs.verbose_type, 0,0, 0.0,0.0,
@@ -98,7 +100,8 @@ char *default_prefs[] =
 " ",
 "#----------------------------- Miscellaneous ---------------------------------",
 " ",
-"GETAREA         N               # Compute how pixels have GETAREA_FLAGS value",
+"GETAREA         N               # Compute effective area on flag and weight image",
+"GETAREA_WEIGHT  0.0             # Weight inferior limit accounted in the area", 
 "GETAREA_FLAGS   1               # Bits which will be accounted in the area", 
 "MEMORY_BUFSIZE  256             # Buffer size in lines",
 "VERBOSE_TYPE    NORMAL          # can be \"QUIET\", \"NORMAL\" or \"FULL\"",
