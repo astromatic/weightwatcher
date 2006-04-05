@@ -184,76 +184,130 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
   pixbuf = (PIXTYPE *)field->strip;
   weight = vector->weight;
   QMALLOC(orbuf, int, w);
-/*---- Scan each line */
-  for (y = (float)bufpos/w; yh--; y += 1.0)
+/*---- Scan each line polygon intersection are flagged */
+  if(prefs.intersec)
     {
-    memset(orbuf, 0, w*sizeof(int));
-/*-- For each polygon */
-    segpoly = vector->segment;
-    nsegpoly = 0;
-    nsegpoly2 = vector->nsegment;
-    for (p=0; p<vector->npoly; p++)
+    for (y = (float)bufpos/w; yh--; y += 1.0)
       {
-      segpoly += nsegpoly;
+      memset(orbuf, 0, w*sizeof(int));
+/*-- For each polygon */
+      segpoly = vector->segment;
       nsegpoly = 0;
-      for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
-        nsegpoly++;
-      nsegpoly2++;
-      if (segpoly->ext != ext)
-        continue;
-      seg = segpoly;
+      nsegpoly2 = vector->nsegment;
+      for (p=0; p<vector->npoly; p++)
+        {
+        segpoly += nsegpoly;
+        nsegpoly = 0;
+        for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
+          nsegpoly++;
+        nsegpoly2++;
+        if (segpoly->ext != ext)
+          continue;
+        seg = segpoly;
 /*---- Clean past history */
-      memset(contextbuf, 0, w*sizeof(int));
+        memset(contextbuf, 0, w*sizeof(int));
 /*---- Find segments that intersect the current scanline */
-      for (i=nsegpoly; i--; seg++)
-	if ((y>seg->y1)^(y>seg->y2))
-          {
-          x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
+        for (i=nsegpoly; i--; seg++)
+	  if ((y>seg->y1)^(y>seg->y2))
+            {
+            x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
 /*-------- Pile cases where intersection is at the left of the frame ... */
-          if (x<0)
-            x = 0;
+            if (x<0)
+              x = 0;
 /*-------- ...and forget those where intersection is at the right */
-          if (x<w)
-	    contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
-          }
+            if (x<w)
+	      contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
+            }
 /*---- "Integrate" contextbuf */
-      cbt = contextbuf;
-      obt = orbuf;
-      pendown = 0;
-
+        cbt = contextbuf;
+        obt = orbuf;
+        pendown = 0;
 /*---- polygon intersection are flagged */
-      if(prefs.intersec)
         for (i=w; i--; obt++)
           {
           if ((*(cbt++)))
             pendown ^= 1;          
           *obt |= pendown; /* OR option */
           }
-/*---- polygon intersection are NOT flagged */
-      else
-        for (i=w; i--; obt++)
-          {
-          if ((*(cbt++)))
-            pendown ^= 1;          	
-	  *obt ^= pendown; /*  XOR option */
-	  }
-
-      }
-
-    obt = orbuf;
-    if (field->flags & FLAG_FIELD)
+        }
+      obt = orbuf;
+      if (field->flags & FLAG_FIELD)
 /*---- First case: update a flag map */
-      {
-      for (i=w; i--; flagbuf++)
-        if ((*(obt++)))
-          *flagbuf |= ofmask;
-      }
-    else
+        {
+        for (i=w; i--; flagbuf++)
+          if ((*(obt++)))
+            *flagbuf |= ofmask;
+        }
+      else
 /*--- Second case: update a weight map */
+        {
+        for (i=w; i--; pixbuf++)
+          if ((*(obt++)))
+            *pixbuf *= weight;
+        }
+      }
+    }
+/*---- Scan each line polygon intersection are NOT flagged */
+  else
+    {
+    for (y = (float)bufpos/w; yh--; y += 1.0)
       {
-      for (i=w; i--; pixbuf++)
-        if ((*(obt++)))
-          *pixbuf *= weight;
+      memset(orbuf, 0, w*sizeof(int));
+/*-- For each polygon */
+      segpoly = vector->segment;
+      nsegpoly = 0;
+      nsegpoly2 = vector->nsegment;
+      for (p=0; p<vector->npoly; p++)
+        {
+        segpoly += nsegpoly;
+        nsegpoly = 0;
+        for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
+          nsegpoly++;
+        nsegpoly2++;
+        if (segpoly->ext != ext)
+          continue;
+        seg = segpoly;
+/*---- Clean past history */
+        memset(contextbuf, 0, w*sizeof(int));
+/*---- Find segments that intersect the current scanline */
+        for (i=nsegpoly; i--; seg++)
+	  if ((y>seg->y1)^(y>seg->y2))
+            {
+            x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
+/*-------- Pile cases where intersection is at the left of the frame ... */
+            if (x<0)
+              x = 0;
+/*-------- ...and forget those where intersection is at the right */
+            if (x<w)
+	      contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
+            }
+/*---- "Integrate" contextbuf */
+          cbt = contextbuf;
+          obt = orbuf;
+          pendown = 0;
+/*---- polygon intersection are NOT flagged */
+          for (i=w; i--; obt++)
+            {
+            if ((*(cbt++)))
+              pendown ^= 1;          	
+	    *obt ^= pendown; /*  XOR option */
+	    }
+	}
+      obt = orbuf;
+      if (field->flags & FLAG_FIELD)
+/*---- First case: update a flag map */
+        {
+        for (i=w; i--; flagbuf++)
+          if ((*(obt++)))
+            *flagbuf |= ofmask;
+        }
+      else
+/*--- Second case: update a weight map */
+        {
+        for (i=w; i--; pixbuf++)
+          if ((*(obt++)))
+            *pixbuf *= weight;
+	}
       }
     }
 

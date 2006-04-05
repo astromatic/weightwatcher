@@ -396,8 +396,8 @@ void	readimagehead(picstruct *field)
 				strcpy(str, def); \
 			}
 
-   int		i,j,l, n;
-   char		*buf, st[80], str[80], *point;
+   int		i, n;
+   char		*buf, st[80], *point;
 
 /* Open the file */
   if (!(field->file = fopen(field->filename, "rb")))
