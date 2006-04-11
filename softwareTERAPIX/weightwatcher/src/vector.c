@@ -240,12 +240,12 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
 
       }
 
-    obt = orbuf;
     if (ffield && (ffield->flags & FLAG_FIELD))
 /*---- First case: update a flag map */
       {
-      flagbuf = (FLAGTYPE *)ffield->strip;
       ofmask = vector->ofmask;
+      flagbuf = (FLAGTYPE *)ffield->strip;
+      obt = orbuf;
       for (i=w; i--; flagbuf++)
         if ((*(obt++)))
           *flagbuf |= ofmask;
@@ -253,8 +253,9 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
     if (wfield)
 /*--- Second case: update a weight map */
       {
-      pixbuf = (PIXTYPE *)wfield->strip;
       weight = vector->weight;
+      pixbuf = (PIXTYPE *)wfield->strip;
+      obt = orbuf;
       for (i=w; i--; pixbuf++)
         if ((*(obt++)))
           *pixbuf *= weight;
