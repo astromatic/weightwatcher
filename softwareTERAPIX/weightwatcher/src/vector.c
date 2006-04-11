@@ -30,6 +30,8 @@
 #include "prefs.h"
 #include "vector.h"
 
+static void	chsort(crosstruct *ra, int n);
+
 /********************************** newvec **********************************/
 /*
 Returns a pointer to a new polygon, and initialize local context buffer:
@@ -139,7 +141,7 @@ vecstruct	*newvec(char *filename)
 
 /* Compute slopes */
   for (i=nseg; i--; seg--)
-    seg->slope = (fabs(dy=seg->y2-seg->y1)>0.0)?(seg->x2-seg->x1)/dy:0.0;
+    seg->slope = (fabs(dy=seg->y2-seg->y1)>0.0)?(seg->x2-seg->x1)/dy: 1.0e9;
 
 /* Save memory */
   vector->nsegment = nseg;
@@ -170,12 +172,13 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
 
   {
    segstruct	*seg, *segpoly;
+   crosstruct	*crosslist;
    FLAGTYPE	*flagbuf, ofmask;
    PIXTYPE	*pixbuf,
 		weight;
    float	y;
-   int		*cbt, *orbuf, *obt,
-		i, p,x, w, yh, pendown, nsegpoly,nsegpoly2;
+   int		*plist, *cbt,
+		c, i, p,x, w, yh, nsegpoly,nsegpoly2, ncross, pcount;
 
 /* Check that an output map is requested */
   if (!wfield && !ffield)
@@ -183,16 +186,30 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
   
   w = wfield? wfield->width : ffield->width;
   yh = bufsize/w;
-  QMALLOC(orbuf, int, w);
+/* Allocate memory for the list of crossing points */
+  if (vector->nsegment)
+    {QMALLOC(crosslist, crosstruct, vector->nsegment);}
+  else
+    return;
+
+  if (vector->npoly)
+    {QMALLOC(plist, int, vector->npoly);}
+  else
+    return;
+
+  ofmask = vector->ofmask;
+  flagbuf = ffield? (FLAGTYPE *)ffield->strip : NULL;
+  weight = vector->weight;
+  pixbuf = wfield? (PIXTYPE *)wfield->strip : NULL;
+
 /*---- Scan each line */
   for (y = (float)bufpos/w; yh--; y += 1.0)
     {
-    memset(orbuf, 0, w*sizeof(int));
 /*-- For each polygon */
     segpoly = vector->segment;
     nsegpoly = 0;
     nsegpoly2 = vector->nsegment;
-    for (p=0; p<vector->npoly; p++)
+    for (c=0, p=0; p<vector->npoly; p++)
       {
       segpoly += nsegpoly;
       nsegpoly = 0;
@@ -202,8 +219,6 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
       if (segpoly->ext != ext)
         continue;
       seg = segpoly;
-/*---- Clean past history */
-      memset(contextbuf, 0, w*sizeof(int));
 /*---- Find segments that intersect the current scanline */
       for (i=nsegpoly; i--; seg++)
 	if ((y>seg->y1)^(y>seg->y2))
@@ -214,55 +229,62 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
             x = 0;
 /*-------- ...and forget those where intersection is at the right */
           if (x<w)
-	    contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
+            {
+            crosslist[c].x = x;
+            crosslist[c].npoly = p;
+            c++;
+            }
           }
-/*---- "Integrate" contextbuf */
-      cbt = contextbuf;
-      obt = orbuf;
-      pendown = 0;
-
-/*---- polygon intersection are flagged */
-      if(prefs.intersec)
-        for (i=w; i--; obt++)
-          {
-          if ((*(cbt++)))
-            pendown ^= 1;          
-          *obt |= pendown; /* OR option */
-          }
-/*---- polygon intersection are NOT flagged */
-      else
-        for (i=w; i--; obt++)
-          {
-          if ((*(cbt++)))
-            pendown ^= 1;          	
-	  *obt ^= pendown; /*  XOR option */
-	  }
-
       }
+
+    ncross = c;
+    if (ncross>1)
+      chsort(crosslist, ncross);
+    memset(plist, 0, vector->npoly*sizeof(int));
+    c = 0;
+    pcount = 0;
+    cbt = contextbuf;
+    if (prefs.intersec)
+      for (x=0; x<w; x++)
+        {
+        for (;c<ncross && crosslist[c].x == x; c++)
+          {
+          if ((plist[crosslist[c].npoly] ^= 1))
+            pcount++;
+          else
+            pcount--;
+          }
+        *(cbt++) = pcount;
+        }
+    else
+      for (x=0; x<w; x++)
+        {
+        for (;c<ncross && crosslist[c].x == x; c++)
+          pcount ^=1;
+        *(cbt++) = pcount;
+        }
 
     if (ffield && (ffield->flags & FLAG_FIELD))
 /*---- First case: update a flag map */
       {
-      ofmask = vector->ofmask;
-      flagbuf = (FLAGTYPE *)ffield->strip;
-      obt = orbuf;
+      cbt = contextbuf;
       for (i=w; i--; flagbuf++)
-        if ((*(obt++)))
+        if ((*(cbt++)))
           *flagbuf |= ofmask;
       }
+
     if (wfield)
 /*--- Second case: update a weight map */
       {
-      weight = vector->weight;
-      pixbuf = (PIXTYPE *)wfield->strip;
-      obt = orbuf;
+      cbt = contextbuf;
       for (i=w; i--; pixbuf++)
-        if ((*(obt++)))
+        if ((*(cbt++)))
           *pixbuf *= weight;
       }
     }
 
-  free(orbuf);
+  free(crosslist);
+  free(plist);
 
   return;
   }
@@ -281,3 +303,44 @@ void	endvec(vecstruct *vector)
   return;
   }
 
+
+/********************************** chsort ************************************/
+/*
+Heapsort algorithm
+*/
+void    chsort(crosstruct *ra, int n)
+
+  {
+   int          l, j, ir, i;
+   crosstruct	rra;
+
+  ra--;
+  for(l = ((ir=n)>>1)+1;;)
+    {
+    if (l>1)
+      rra = ra[--l];
+    else
+      {
+      rra = ra[ir];
+      ra[ir] = ra[1];
+      if (--ir == 1)
+        {
+        ra[1] = rra;
+        return;
+        }
+      }
+    for (j = (i=l)<<1; j <= ir;)
+      {
+      if (j < ir && ra[j].x < ra[j+1].x)
+        ++j;
+      if (rra.x < ra[j].x)
+        {
+        ra[i] = ra[j];
+        j += (i=j);
+        }
+      else
+        j = ir + 1;
+      }
+    ra[i] = rra;
+    }
+  }

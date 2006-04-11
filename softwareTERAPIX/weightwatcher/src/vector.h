@@ -31,7 +31,7 @@ typedef struct vec
   FILE		*file;			/* FILE structure */
   struct seg	*segment;		/* Ptr to an array of line segments */
   int		nsegment;		/* Number of line segments */
-    int		npoly;			/* Number of polygons involved */
+  int		npoly;			/* Number of polygons involved */
   FLAGTYPE	ofmask;			/* Bit-mask to be OR'ed in output */
   PIXTYPE	weight;			/* Weight factor applied to weightmap*/
   }	vecstruct;
@@ -45,6 +45,13 @@ typedef struct seg
   float		x2,y2;			/* Coords of segment's 2nd point */
   float		slope;			/* (x2-x1)/(y2-y1) */
   }	segstruct;
+
+/* Crossing points */
+typedef struct cross
+  {
+  int		x;			/* x coordinate of the crossing point */
+  int		npoly;			/* polygon index */
+  }	crosstruct;
 
 /*---------------------------------- protos --------------------------------*/
 
