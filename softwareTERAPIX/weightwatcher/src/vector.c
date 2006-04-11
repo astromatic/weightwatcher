@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	01/03/2006
+*	Last modify:	11/04/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -165,8 +165,8 @@ vecstruct	*newvec(char *filename)
 Update a field image buffer, according to vector information found in the
 vector polygon.
 */
-void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
-		int bufsize, int *contextbuf, int ext)
+void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
+		int bufpos, int bufsize, int *contextbuf, int ext)
 
   {
    segstruct	*seg, *segpoly;
@@ -177,137 +177,87 @@ void	vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
    int		*cbt, *orbuf, *obt,
 		i, p,x, w, yh, pendown, nsegpoly,nsegpoly2;
 
-  w = field->width;
+/* Check that an output map is requested */
+  if (!wfield && !ffield)
+    return;
+  
+  w = wfield? wfield->width : ffield->width;
   yh = bufsize/w;
-  ofmask = vector->ofmask;
-  flagbuf = (FLAGTYPE *)field->strip;
-  pixbuf = (PIXTYPE *)field->strip;
-  weight = vector->weight;
   QMALLOC(orbuf, int, w);
-/*---- Scan each line polygon intersection are flagged */
-  if(prefs.intersec)
+/*---- Scan each line */
+  for (y = (float)bufpos/w; yh--; y += 1.0)
     {
-    for (y = (float)bufpos/w; yh--; y += 1.0)
-      {
-      memset(orbuf, 0, w*sizeof(int));
+    memset(orbuf, 0, w*sizeof(int));
 /*-- For each polygon */
-      segpoly = vector->segment;
+    segpoly = vector->segment;
+    nsegpoly = 0;
+    nsegpoly2 = vector->nsegment;
+    for (p=0; p<vector->npoly; p++)
+      {
+      segpoly += nsegpoly;
       nsegpoly = 0;
-      nsegpoly2 = vector->nsegment;
-      for (p=0; p<vector->npoly; p++)
-        {
-        segpoly += nsegpoly;
-        nsegpoly = 0;
-        for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
-          nsegpoly++;
-        nsegpoly2++;
-        if (segpoly->ext != ext)
-          continue;
-        seg = segpoly;
+      for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
+        nsegpoly++;
+      nsegpoly2++;
+      if (segpoly->ext != ext)
+        continue;
+      seg = segpoly;
 /*---- Clean past history */
-        memset(contextbuf, 0, w*sizeof(int));
+      memset(contextbuf, 0, w*sizeof(int));
 /*---- Find segments that intersect the current scanline */
-        for (i=nsegpoly; i--; seg++)
-	  if ((y>seg->y1)^(y>seg->y2))
-            {
-            x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
+      for (i=nsegpoly; i--; seg++)
+	if ((y>seg->y1)^(y>seg->y2))
+          {
+          x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
 /*-------- Pile cases where intersection is at the left of the frame ... */
-            if (x<0)
-              x = 0;
+          if (x<0)
+            x = 0;
 /*-------- ...and forget those where intersection is at the right */
-            if (x<w)
-	      contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
-            }
+          if (x<w)
+	    contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
+          }
 /*---- "Integrate" contextbuf */
-        cbt = contextbuf;
-        obt = orbuf;
-        pendown = 0;
+      cbt = contextbuf;
+      obt = orbuf;
+      pendown = 0;
+
 /*---- polygon intersection are flagged */
+      if(prefs.intersec)
         for (i=w; i--; obt++)
           {
           if ((*(cbt++)))
             pendown ^= 1;          
           *obt |= pendown; /* OR option */
           }
-        }
-      obt = orbuf;
-      if (field->flags & FLAG_FIELD)
-/*---- First case: update a flag map */
-        {
-        for (i=w; i--; flagbuf++)
-          if ((*(obt++)))
-            *flagbuf |= ofmask;
-        }
-      else
-/*--- Second case: update a weight map */
-        {
-        for (i=w; i--; pixbuf++)
-          if ((*(obt++)))
-            *pixbuf *= weight;
-        }
-      }
-    }
-/*---- Scan each line polygon intersection are NOT flagged */
-  else
-    {
-    for (y = (float)bufpos/w; yh--; y += 1.0)
-      {
-      memset(orbuf, 0, w*sizeof(int));
-/*-- For each polygon */
-      segpoly = vector->segment;
-      nsegpoly = 0;
-      nsegpoly2 = vector->nsegment;
-      for (p=0; p<vector->npoly; p++)
-        {
-        segpoly += nsegpoly;
-        nsegpoly = 0;
-        for (seg=segpoly; nsegpoly2-- && seg->poly==p; seg++)
-          nsegpoly++;
-        nsegpoly2++;
-        if (segpoly->ext != ext)
-          continue;
-        seg = segpoly;
-/*---- Clean past history */
-        memset(contextbuf, 0, w*sizeof(int));
-/*---- Find segments that intersect the current scanline */
-        for (i=nsegpoly; i--; seg++)
-	  if ((y>seg->y1)^(y>seg->y2))
-            {
-            x = (int)(seg->x1 + (y-seg->y1)*seg->slope + 0.49999);
-/*-------- Pile cases where intersection is at the left of the frame ... */
-            if (x<0)
-              x = 0;
-/*-------- ...and forget those where intersection is at the right */
-            if (x<w)
-	      contextbuf[x] ^= 1; /* XOR enable us to handle x<0 cases */
-            }
-/*---- "Integrate" contextbuf */
-          cbt = contextbuf;
-          obt = orbuf;
-          pendown = 0;
 /*---- polygon intersection are NOT flagged */
-          for (i=w; i--; obt++)
-            {
-            if ((*(cbt++)))
-              pendown ^= 1;          	
-	    *obt ^= pendown; /*  XOR option */
-	    }
-	}
-      obt = orbuf;
-      if (field->flags & FLAG_FIELD)
-/*---- First case: update a flag map */
-        {
-        for (i=w; i--; flagbuf++)
-          if ((*(obt++)))
-            *flagbuf |= ofmask;
-        }
       else
+        for (i=w; i--; obt++)
+          {
+          if ((*(cbt++)))
+            pendown ^= 1;          	
+	  *obt ^= pendown; /*  XOR option */
+	  }
+
+      }
+
+    obt = orbuf;
+    if (ffield && (ffield->flags & FLAG_FIELD))
+/*---- First case: update a flag map */
+      {
+      flagbuf = (FLAGTYPE *)ffield->strip;
+      ofmask = vector->ofmask;
+      for (i=w; i--; flagbuf++)
+        if ((*(obt++)))
+          *flagbuf |= ofmask;
+      }
+    if (wfield)
 /*--- Second case: update a weight map */
-        {
-        for (i=w; i--; pixbuf++)
-          if ((*(obt++)))
-            *pixbuf *= weight;
-	}
+      {
+      pixbuf = (PIXTYPE *)wfield->strip;
+      weight = vector->weight;
+      for (i=w; i--; pixbuf++)
+        if ((*(obt++)))
+          *pixbuf *= weight;
       }
     }
 

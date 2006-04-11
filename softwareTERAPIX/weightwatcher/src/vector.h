@@ -9,7 +9,7 @@
 *
 *	Contents:	Vector structures.
 *
-*	Last modify:	01/03/2006
+*	Last modify:	11/04/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -51,6 +51,7 @@ typedef struct seg
 vecstruct	*newvec(char *filename);
 
 void		endvec(vecstruct *vector),
-		vec_to_map(vecstruct *vector, picstruct *field, int bufpos,
-		int bufsize, int *contextbuf, int ext);
+		vec_to_map(vecstruct *vector, picstruct *wfield,
+			picstruct *ffield, int bufpos,
+			int bufsize, int *contextbuf, int ext);
 

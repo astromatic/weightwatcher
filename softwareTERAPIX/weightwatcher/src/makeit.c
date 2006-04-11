@@ -9,7 +9,7 @@
 *
 *       Contents:       Main program
 *
-*       Last modify:    02/03/2006
+*       Last modify:    11/04/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -64,6 +64,7 @@ void	makeit(void)
   bowl = 0;
 
 /* Compute the number of valid input extensions */
+  filename = NULL;	/* to avoid gcc -Wall warnings */
   if (prefs.nweight_name)
     filename = prefs.weight_name[0];
   else if (prefs.nflag_name)
@@ -99,6 +100,7 @@ void	makeit(void)
     if (vector->ofmask > maxbit)
       maxbit = vector->ofmask;
     }
+  width = height = 0;	/* Avoid gcc -Wall warnings */
   for (ext=0; ext<next; ext++)
 /* Open weight images */
     {
@@ -170,6 +172,8 @@ void	makeit(void)
       }
 
 /*-- Prepare the WEIGHT output-image */
+    owstrip = NULL;	/* Avoid gcc -Wall warnings */
+    stripsize = 0;	/* Avoid gcc -Wall warnings */
     if (*prefs.oweight_name)
       {
       owfield = newfield(prefs.oweight_name, WEIGHT_FIELD,
@@ -180,6 +184,7 @@ void	makeit(void)
       }
 
 /*-- Prepare the FLAG output-image */
+    ofstrip = NULL;	/* Avoid gcc -Wall warnings */
     if (*prefs.oflag_name)
       {
 /*---- We first make a dummy copy of a FLAG input-image as a reference */
@@ -210,11 +215,10 @@ void	makeit(void)
     NFPRINTF(OUTPUT, "Processing...");
     cumspoon = 0;
     spoonful = stripsize;
+    flagmask = 0;
+    area = area0 =0;
     if (prefs.getarea)
       {
-      area = 0;
-      area0 =0;
-      flagmask = 0;
       for (t=0;t<prefs.ngeta_flags;t++)
         flagmask += prefs.geta_flags[t];
       }
@@ -290,14 +294,8 @@ void	makeit(void)
 
 /*---- Third step: extract info from input polygon vectors */
       for (i=0; i<prefs.nvec_name; i++)
-        {
-        vector = vec[i];
-        if (owfield)
-          vec_to_map(vector, owfield, cumspoon, spoonful, contextbuf, ext);
-
-        if (offield && (fmask=vector->ofmask))
-          vec_to_map(vector, offield, cumspoon, spoonful, contextbuf, ext);
-        }
+        vec_to_map(vec[i], owfield, offield,
+		cumspoon, spoonful, contextbuf, ext);
       cumspoon += spoonful;
 
 /*---- Write WEIGHT buffer */
@@ -358,6 +356,8 @@ void	makeit(void)
         }
       }
 
+    free(contextbuf);
+
     for (i=0; i<prefs.nweight_name; i++)
       endfield(wfield[i]);
     free(wfield);
@@ -406,7 +406,6 @@ void	makeit(void)
   for (i=0; i<prefs.nvec_name; i++)
     endvec(vec[i]);
   free(vec);
-  free(contextbuf);
 
   return;
   }
