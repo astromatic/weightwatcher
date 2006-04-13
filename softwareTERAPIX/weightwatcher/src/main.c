@@ -44,7 +44,7 @@ int	main(int argc, char *argv[])
 
   {
    static char	prefsname[MAXCHAR];
-   char		**argkey, **argval, *str;
+   char		**argkey, **argval;
    int		a, narg, opt;
 
   if (argc<2)

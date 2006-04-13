@@ -46,6 +46,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
    int		ival, nok2, ntab;
 
 /* First allocate memory for the new field (and nullify pointers) */
+   mefpos = 0.; /* Avoid gcc -Wall warnings */
   QCALLOC(field, picstruct, 1);
   if (mfield)
     *field = *mfield;
