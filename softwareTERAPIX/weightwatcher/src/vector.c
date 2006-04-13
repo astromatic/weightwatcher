@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	11/04/2006
+*	Last modify:	13/04/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -45,7 +45,7 @@ vecstruct	*newvec(char *filename)
    static char	str[MAXPOLYCHAR];
    float	dy;
    char		*str2;
-   int		i, npoly, nseg, nline, ext;
+   int		i, npoly, nseg,nseg0, nline, ext;
 
 /* First allocate memory for the new vector (and nullify pointers) */
   QCALLOC(vector, vecstruct, 1);
@@ -108,6 +108,8 @@ vecstruct	*newvec(char *filename)
 
 /*-- Decode the POLYGON information as a set of segments */
     seg0 = seg;
+    nseg0 = nseg;
+
     while(1)
       {
       if (!(str2 = strtok(NULL, vectok)))
@@ -116,7 +118,8 @@ vecstruct	*newvec(char *filename)
         {
         vector->nsegment = (int)(vector->nsegment*1.6);
         QREALLOC(vector->segment, segstruct, vector->nsegment);
-        seg = vector->segment+nseg;
+        seg0 = vector->segment + nseg0;
+        seg = vector->segment + nseg;
         }
       else
         seg++;
@@ -137,17 +140,17 @@ vecstruct	*newvec(char *filename)
     }
 
 /* We now have all the points: forget the last "segment" */
-  seg--;
+  seg = vector->segment;
 
 /* Compute slopes */
-  for (i=nseg; i--; seg--)
+  for (i=nseg; i--; seg++)
     seg->slope = (fabs(dy=seg->y2-seg->y1)>0.0)?(seg->x2-seg->x1)/dy: 1.0e9;
 
 /* Save memory */
-  vector->nsegment = nseg;
   vector->npoly = npoly;
   if (nseg && nseg<vector->nsegment)
     {
+    vector->nsegment = nseg;
     QREALLOC(vector->segment, segstruct, vector->nsegment);
     }
 
