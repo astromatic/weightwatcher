@@ -46,7 +46,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
    int		ival, nok2, ntab;
 
 /* First allocate memory for the new field (and nullify pointers) */
-   mefpos = 0.; /* Avoid gcc -Wall warnings */
+  mefpos = 0.; /* Avoid gcc -Wall warnings */
   QCALLOC(field, picstruct, 1);
   if (mfield)
     *field = *mfield;
@@ -112,7 +112,10 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     fitswrite(field->fitshead, "SOFTDATE", DATE, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTAUTH", COPYRIGHT, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTINST", INSTITUTE, H_STRING, T_STRING);
-
+    if (prefs.getarea)
+      {
+      fitsadd(field->fitshead, "EFF_AREA", "effective area");
+      }
 /*-- Neutralize possible scaling factors */
     dval = 1.0; fitswrite(field->fitshead, "BSCALE  ",&dval,H_FLOAT,T_DOUBLE);
     dval = 0.0; fitswrite(field->fitshead, "BZERO   ",&dval,H_FLOAT,T_DOUBLE);
@@ -127,12 +130,20 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
       fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
       fitswrite(field->fitshead, "OBJECT  ", "FLAG MAP", H_STRING,T_STRING);
+      if (prefs.getarea)
+        fitsadd(field->fitshead, "FLAGAREA",
+            "Bits which will not be accounted in the area");
       }
     else
       {
       ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
       fitswrite(field->fitshead, "OBJECT  ", "WEIGHT MAP", H_STRING,T_STRING);
       field->bitpix = BP_FLOAT;
+      if (prefs.getarea)
+        fitsadd(field->fitshead, "WEIGAREA",
+            "Weight inferior limit accounted in the area");
+        fitswrite(field->fitshead, "WEIGAREA",&prefs.weightlim,H_FLOAT,
+            T_DOUBLE);
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;

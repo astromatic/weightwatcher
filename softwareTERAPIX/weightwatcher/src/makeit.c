@@ -217,6 +217,7 @@ void	makeit(void)
     spoonful = stripsize;
     flagmask = 0;
     area = area0 =0;
+    farea = farea0 =0.;
     if (prefs.getarea)
       {
       for (t=0;t<prefs.ngeta_flags;t++)
@@ -302,6 +303,15 @@ void	makeit(void)
 
       if (owfield)
         {
+	if (prefs.getarea)
+          {
+	  /* Computing area having zeroes on weight image*/
+	  weight = (PIXTYPE *)owfield->strip;
+          for (npix = spoonful; npix--;)
+            area0 += ((*(weight++))>prefs.weightlim);
+          farea0 = (double)(area0)/(double)(width*height);
+          fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+	  }
         if (bswapflag)
           swapbytes(owstrip, 4, spoonful);
         QFWRITE(owstrip, spoonful*sizeof(PIXTYPE), owfield->file,
@@ -311,18 +321,16 @@ void	makeit(void)
 /*---- Convert the FLAG 32bits data to the output buffer (8,16 or 32 bits) */
       if (offield)
         {
-	  if (prefs.getarea)
-	    {
-	    /* Computing area having flag on flag image*/
-	    flag = (FLAGTYPE *)offield->strip;
-	    for (npix = spoonful; npix--;)
-	      area += ((*(flag++)&flagmask)!=0);
-
-	    /* Computing area having zeroes on weight image*/
-	    weight = (PIXTYPE *)owfield->strip;
-	    for (npix = spoonful; npix--;)
-	      area0 += ((*(weight++))>prefs.weightlim);
-	    }
+	if (prefs.getarea)
+          {
+          /* Computing area having flag on flag image*/
+          flag = (FLAGTYPE *)offield->strip;
+          for (npix = spoonful; npix--;)
+            area += ((*(flag++)&flagmask)!=0);
+          farea = 1. - (double)(area)/(double)(width*height);
+          fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
+          fitswrite(field->fitshead, "FLAGAREA",&flagmask,H_INT,T_LONG);
+          }
 
         if (offield->bitpix!=BP_LONG)
           {
@@ -376,10 +384,7 @@ void	makeit(void)
 	FPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
       FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
       FPRINTF(OUTPUT, "= %ld\n",area);
-      farea = (double)(area)/(double)(width*height);
-      FPRINTF(OUTPUT, "> Fraction of pixels flagged = %e\n",farea);
-      FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",1-farea);
-      farea0 = (double)(area0)/(double)(width*height);
+      FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",farea);
       FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
       FPRINTF(OUTPUT, "\n");
       }
@@ -399,6 +404,7 @@ void	makeit(void)
         QFWRITE(charpix, padsize, offield->file, offield->rfilename);
       endfield(offield);
       }
+	printf("%s\n",offield->fitshead);
     free(charpix);
     }
 
