@@ -313,6 +313,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
       }
     }
 
+
   for (i=0; key[i].name[0]; i++)
     if (!key[i].flag)
       error(EXIT_FAILURE, key[i].name, " configuration keyword missing");
@@ -333,7 +334,7 @@ int	findkeys(char *str, char keyw[][16], int mode)
   int i;
 
   for (i=0; keyw[i][0]; i++)
-    if (!cistrcmp(str, keyw[i], mode))
+    if ((!cistrcmp(str, keyw[i], mode)))
       return i;
 
   return RETURN_ERROR;
@@ -352,13 +353,13 @@ int	cistrcmp(char *cs, char *ct, int mode)
   if (mode)
     {
     for (i=0; cs[i]&&ct[i]; i++)
-      if (diff=tolower((int)cs[i])-tolower((int)ct[i]))
+      if ((diff=(tolower((int)cs[i])-tolower((int)ct[i]))))
         return diff;
     }
   else
     {
     for (i=0; cs[i]||ct[i]; i++)
-      if (diff=tolower((int)cs[i])-tolower((int)ct[i]))
+      if ((diff=(tolower((int)cs[i])-tolower((int)ct[i]))))
         return diff;
     }
 

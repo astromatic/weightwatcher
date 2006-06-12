@@ -48,6 +48,7 @@ void	makeit(void)
    short	*shortpix;
    int		*contextbuf;
    unsigned long area, area0;
+   float        wwlim;
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
@@ -59,9 +60,11 @@ void	makeit(void)
   install_cleanup(NULL);
 #endif
 
+  field = NULL; /* Avoid gcc -Wall warnings */
   owfield = offield = NULL;     /* No output weights or flags is the default */
   maxbit = 0;
   bowl = 0;
+  wwlim=0.0;
 
 /* Compute the number of valid input extensions */
   filename = NULL;	/* to avoid gcc -Wall warnings */
@@ -221,7 +224,9 @@ void	makeit(void)
     if (prefs.getarea)
       {
       for (t=0;t<prefs.ngeta_flags;t++)
+	{
         flagmask += prefs.geta_flags[t];
+	}
       }
     for (; bowl; bowl -= spoonful)
       {
@@ -306,11 +311,12 @@ void	makeit(void)
 	if (prefs.getarea)
           {
 	  /* Computing area having zeroes on weight image*/
+	  
 	  weight = (PIXTYPE *)owfield->strip;
           for (npix = spoonful; npix--;)
             area0 += ((*(weight++))>prefs.weightlim);
           farea0 = (double)(area0)/(double)(width*height);
-          fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+          /* fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE); */
 	  }
         if (bswapflag)
           swapbytes(owstrip, 4, spoonful);
@@ -328,8 +334,10 @@ void	makeit(void)
           for (npix = spoonful; npix--;)
             area += ((*(flag++)&flagmask)!=0);
           farea = 1. - (double)(area)/(double)(width*height);
+          /*
           fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
           fitswrite(field->fitshead, "FLAGAREA",&flagmask,H_INT,T_LONG);
+          */
           }
 
         if (offield->bitpix!=BP_LONG)
@@ -404,7 +412,6 @@ void	makeit(void)
         QFWRITE(charpix, padsize, offield->file, offield->rfilename);
       endfield(offield);
       }
-	printf("%s\n",offield->fitshead);
     free(charpix);
     }
 
