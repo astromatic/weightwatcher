@@ -94,6 +94,8 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       {
       QCALLOC(field->fitshead, char, field->fitsheadsize+FBSIZE);
       memcpy(field->fitshead, mfield->fitshead, field->fitsheadsize);
+      /* as in precedent version */
+      field->fitsheadsize += FBSIZE;
       }
     else
       {
@@ -111,10 +113,10 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     fitswrite(field->fitshead, "SOFTDATE", DATE, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTAUTH", COPYRIGHT, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTINST", INSTITUTE, H_STRING, T_STRING);
-    if (prefs.getarea)
+    /* if (prefs.getarea)
       {
       fitsadd(field->fitshead, "EFF_AREA", "effective area");
-      }
+      } */
 /*-- Neutralize possible scaling factors */
     dval = 1.0; fitswrite(field->fitshead, "BSCALE  ",&dval,H_FLOAT,T_DOUBLE);
     dval = 0.0; fitswrite(field->fitshead, "BZERO   ",&dval,H_FLOAT,T_DOUBLE);
