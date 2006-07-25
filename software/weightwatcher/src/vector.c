@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	13/04/2006
+*	Last modify:	25/07/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -75,7 +75,7 @@ vecstruct	*newvec(char *filename)
     if (!nline)
       {
       if (*str != (char)'#')
-        error(EXIT_FAILURE, vector->filename, " is NOT an"
+        error(EXIT_FAILURE, vector->filename, " is NOT a"
 		" DS9/SAOimage vector-file");
       if (*str)
         str[strlen(str)-1] = (char)'\0';
@@ -96,14 +96,11 @@ vecstruct	*newvec(char *filename)
       str2=strtok(str, vectok);
       }
 
-    if (strstr(str2,"image"))
-      {
-      if (!(strstr(strtok(NULL, vectok), "polygon")))
-	continue;
-      }
-    else
-      continue;
+    if (str2 && strstr(str2,"image"))
+      str2 = strtok(NULL, vectok);
 
+    if (str2 && !(strstr(str2, "polygon")))
+	continue;
       
 
 /*-- Decode the POLYGON information as a set of segments */
@@ -112,7 +109,7 @@ vecstruct	*newvec(char *filename)
 
     while(1)
       {
-      if (!(str2 = strtok(NULL, vectok)))
+      if (!(str2 = strtok(NULL, vectok)) || *str2=='#')
         break;
       if ((++nseg)>=vector->nsegment)
         {
