@@ -90,14 +90,28 @@ void	readdata(picstruct *field, PIXTYPE *ptr, int size)
             if (bswapflag)
               swapbytes(bufdata, 4, spoonful);
             for (i=spoonful; i--; bufdata += sizeof(float))
-              *(ptr++) = *((float *)bufdata)*bs + bz;
+              *(ptr++) = ((0x7f800000&*(unsigned int *)bufdata) == 0x7f800000)?
+			-BIG : *((float *)bufdata)*bs + bz;
+              /* *(ptr++) = *((float *)bufdata)*bs + bz; */
             break;
 
           case BP_DOUBLE:
             if (bswapflag)
+	      {
               swapbytes(bufdata, 8, spoonful);
-            for (i=spoonful; i--; bufdata += sizeof(double))
-              *(ptr++) = *((double *)bufdata)*bs + bz;
+	      for (i=spoonful; i--; bufdata += sizeof(double))
+		/* *(ptr++) = *((double *)bufdata)*bs + bz; */
+                *(ptr++) = ((0x7ff00000 & *(unsigned int *)(bufdata+4))
+			== 0x7ff00000)?
+			-BIG : *((double *)bufdata)*bs + bz;
+              }
+            else
+              {
+              for (i=spoonful; i--; bufdata += sizeof(double))
+                *(ptr++) = ((0x7ff00000 & *(unsigned int *)bufdata)
+			== 0x7ff00000)?
+			-BIG : *((double *)bufdata)*bs + bz;
+	      }
             break;
 
           default:
