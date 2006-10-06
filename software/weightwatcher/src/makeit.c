@@ -47,7 +47,7 @@ void	makeit(void)
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
-   unsigned long area, area0;
+   unsigned long area, area0, arposw, arposf;
    float        wwlim;
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
@@ -222,12 +222,8 @@ void	makeit(void)
     area = area0 =0;
     farea = farea0 =0.;
     if (prefs.getarea)
-      {
       for (t=0;t<prefs.ngeta_flags;t++)
-	{
         flagmask += prefs.geta_flags[t];
-	}
-      }
     for (; bowl; bowl -= spoonful)
       {
       if (spoonful>bowl)
@@ -310,13 +306,11 @@ void	makeit(void)
         {
 	if (prefs.getarea)
           {
-	  /* Computing area having zeroes on weight image*/
-	  
+	  /* Computing area having zeroes on weight image*/	  
 	  weight = (PIXTYPE *)owfield->strip;
           for (npix = spoonful; npix--;)
             area0 += ((*(weight++))>prefs.weightlim);
           farea0 = (double)(area0)/(double)(width*height);
-          /* fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE); */
 	  }
         if (bswapflag)
           swapbytes(owstrip, 4, spoonful);
@@ -334,10 +328,6 @@ void	makeit(void)
           for (npix = spoonful; npix--;)
             area += ((*(flag++)&flagmask)!=0);
           farea = 1. - (double)(area)/(double)(width*height);
-          /*
-          fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
-          fitswrite(field->fitshead, "FLAGAREA",&flagmask,H_INT,T_LONG);
-          */
           }
 
         if (offield->bitpix!=BP_LONG)
@@ -403,6 +393,17 @@ void	makeit(void)
       padsize = (FBSIZE -((owfield->npix*sizeof(PIXTYPE))%FBSIZE)) % FBSIZE;
       if (padsize)
         QFWRITE(charpix, padsize, owfield->file, owfield->rfilename);
+      if (prefs.getarea)
+        {
+        arposw=ftell(owfield->file);
+        fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+/* -- Trying to write AREA keywords in header  */
+        fseek(owfield->file,owfield->mefpos,SEEK_SET);
+      /*  QFWRITE(owfield->fitshead,owfield->fitsheadsize,
+               owfield->file, owfield->rfilename); */
+        fseek(owfield->file,arposw,SEEK_SET);
+
+        }
       endfield(owfield);
       }
     if (offield)
@@ -410,10 +411,27 @@ void	makeit(void)
       padsize = (FBSIZE -((offield->npix*offield->bytepix)%FBSIZE)) % FBSIZE;
       if (padsize)
         QFWRITE(charpix, padsize, offield->file, offield->rfilename);
+      if (prefs.getarea)
+        {
+        arposf=ftell(offield->file);
+        fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
+/* -- Trying to write AREA keywords in header */
+   /* printf("dove sono = %ld %d\n",arposf,flagmask); */
+        fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
+        fseek(offield->file,offield->mefpos,SEEK_SET);
+  /*  printf("dove mi rimetto = %ld\n",offield->mefpos); */
+       /* QFWRITE(offield->fitshead,offield->fitsheadsize,
+               offield->file, offield->rfilename); */
+  /*  printf("fine scrittura = %ld\n",ftell(offield->file)); */
+        fseek(offield->file,arposf,SEEK_SET);
+  /*  printf("dove risono = %ld\n",ftell(offield->file)); */
+
+        }
       endfield(offield);
       }
     free(charpix);
     }
+
 
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)

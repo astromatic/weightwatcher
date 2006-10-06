@@ -86,15 +86,18 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         free(buf);
         }
       }
-    else
-      if (!(field->file = fopen(field->filename, "ab")))
-        error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
 
+    else
+      {
+      if (!(field->file = fopen(field->filename, "rb+")))
+        error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
+      fseek(field->file,0L,SEEK_END);
+  /*  printf("This is the end of file %ld\n",ftell(field->file)); */
+      }
     if (fitsfind(field->fitshead, "END     ")+7 >= field->fitsheadsize/80)
       {
       QCALLOC(field->fitshead, char, field->fitsheadsize+FBSIZE);
       memcpy(field->fitshead, mfield->fitshead, field->fitsheadsize);
-      /* as in precedent version */
       field->fitsheadsize += FBSIZE;
       }
     else
@@ -108,15 +111,14 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     fitsadd(field->fitshead, "SOFTDATE", "Release date of the software");
     fitsadd(field->fitshead, "SOFTAUTH", "Maintainer of the software");
     fitsadd(field->fitshead, "SOFTINST", "Home institute  of the software");
+    if (prefs.getarea)
+      fitsadd(field->fitshead, "EFF_AREA", "effective area");
     fitswrite(field->fitshead, "SOFTNAME", BANNER, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTVERS", MYVERSION, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTDATE", DATE, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTAUTH", COPYRIGHT, H_STRING, T_STRING);
     fitswrite(field->fitshead, "SOFTINST", INSTITUTE, H_STRING, T_STRING);
-    /* if (prefs.getarea)
-      {
-      fitsadd(field->fitshead, "EFF_AREA", "effective area");
-      } */
+
 /*-- Neutralize possible scaling factors */
     dval = 1.0; fitswrite(field->fitshead, "BSCALE  ",&dval,H_FLOAT,T_DOUBLE);
     dval = 0.0; fitswrite(field->fitshead, "BZERO   ",&dval,H_FLOAT,T_DOUBLE);
@@ -131,18 +133,15 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
       fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
       fitswrite(field->fitshead, "OBJECT  ", "FLAG MAP", H_STRING,T_STRING);
-      /*
       if (prefs.getarea)
         fitsadd(field->fitshead, "FLAGAREA",
             "Bits which will not be accounted in the area");
-      */
       }
     else
       {
       ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
       fitswrite(field->fitshead, "OBJECT  ", "WEIGHT MAP", H_STRING,T_STRING);
       field->bitpix = BP_FLOAT;
-      /*
       if (prefs.getarea)
         {
         fitsadd(field->fitshead, "WEIGAREA",
@@ -150,7 +149,6 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         fitswrite(field->fitshead, "WEIGAREA",&prefs.weightlim,H_FLOAT,
             T_DOUBLE);
         }
-      */
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;
