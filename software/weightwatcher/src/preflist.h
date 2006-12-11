@@ -67,7 +67,7 @@ static const char	notokstr[] = {" \t=,;\n\r\""};
 char *default_prefs[] =
  {
 "# Default configuration file for " BANNER " " MYVERSION,
-"# EB " DATE,
+"# EB CM " DATE,
 "#",
 " ",
 "#--------------------------------- Weights ------------------------------------",

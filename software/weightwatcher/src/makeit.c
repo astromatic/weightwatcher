@@ -193,16 +193,16 @@ void	makeit(void)
 /*---- We first make a dummy copy of a FLAG input-image as a reference */
       QMALLOC(field, picstruct, 1);
       *field = ffield?**ffield:**wfield;
+
+      offield = newfield(prefs.oflag_name, FLAG_FIELD, ffield? *ffield :
+                *wfield, ext, next);
 /*---- Select the output FLAG image # of bits per pixel */
       if (maxbit >= (1<<15))
-        field->bitpix = BP_LONG;
+        offield->bitpix = BP_LONG;
       else if (maxbit >= (1<<7))
-        field->bitpix = BP_SHORT;
+        offield->bitpix = BP_SHORT;
       else
-        field->bitpix = BP_BYTE;
-
-      offield = newfield(prefs.oflag_name, FLAG_FIELD, field, ext, next);
-      free(field);
+        offield->bitpix = BP_BYTE;
       stripsize = offield->stripheight*offield->width;
       ofstrip = (char *)offield->strip;
       bowl = offield->npix;
@@ -327,7 +327,7 @@ void	makeit(void)
           flag = (FLAGTYPE *)offield->strip;
           for (npix = spoonful; npix--;)
             area += ((*(flag++)&flagmask)!=0);
-          farea = 1. - (double)(area)/(double)(width*height);
+        /*   farea = 1. - (double)(area)/(double)(width*height); */
           }
 
         if (offield->bitpix!=BP_LONG)
@@ -377,13 +377,21 @@ void	makeit(void)
       {
       FPRINTF(OUTPUT, "\n \n");
       FPRINTF(OUTPUT, "> Total number of pixels = %d\n",width*height);
-      FPRINTF(OUTPUT, "> Pixels flagged as ");
-      for (t=0;t<prefs.ngeta_flags-1;t++)
-	FPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
-      FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
-      FPRINTF(OUTPUT, "= %ld\n",area);
-      FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",farea);
-      FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
+      if (owfield)
+        {
+        farea0 = (double)(area0)/(double)(width*height);
+        FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
+        }
+      if (offield)
+        {
+        farea = 1. - (double)(area)/(double)(width*height);
+        FPRINTF(OUTPUT, "> Pixels flagged as ");
+        for (t=0;t<prefs.ngeta_flags-1;t++)
+	  FPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
+        FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
+        FPRINTF(OUTPUT, "= %ld\n",area);
+        FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",farea);
+        }
       FPRINTF(OUTPUT, "\n");
       }
     NFPRINTF(OUTPUT, "Closing files...");
@@ -396,13 +404,12 @@ void	makeit(void)
       if (prefs.getarea)
         {
         arposw=ftell(owfield->file);
-        fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
-/* -- Trying to write AREA keywords in header  */
+/* -- writing EFF_AREA keyword in weight header  */
         fseek(owfield->file,owfield->mefpos,SEEK_SET);
-      /*  QFWRITE(owfield->fitshead,owfield->fitsheadsize,
-               owfield->file, owfield->rfilename); */
+        fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+        QFWRITE(owfield->fitshead,owfield->fitsheadsize,
+               owfield->file, owfield->rfilename);
         fseek(owfield->file,arposw,SEEK_SET);
-
         }
       endfield(owfield);
       }
@@ -414,18 +421,13 @@ void	makeit(void)
       if (prefs.getarea)
         {
         arposf=ftell(offield->file);
-        fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
-/* -- Trying to write AREA keywords in header */
-   /* printf("dove sono = %ld %d\n",arposf,flagmask); */
-        fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
+/* -- writing EFF_AREA keyword in flag header  */
         fseek(offield->file,offield->mefpos,SEEK_SET);
-  /*  printf("dove mi rimetto = %ld\n",offield->mefpos); */
-       /* QFWRITE(offield->fitshead,offield->fitsheadsize,
-               offield->file, offield->rfilename); */
-  /*  printf("fine scrittura = %ld\n",ftell(offield->file)); */
+        fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
+        fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
+        QFWRITE(offield->fitshead,offield->fitsheadsize,
+               offield->file, offield->rfilename);
         fseek(offield->file,arposf,SEEK_SET);
-  /*  printf("dove risono = %ld\n",ftell(offield->file)); */
-
         }
       endfield(offield);
       }

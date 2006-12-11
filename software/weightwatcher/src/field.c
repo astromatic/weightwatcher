@@ -181,6 +181,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       error(EXIT_FAILURE, "Not enough valid FITS image extensions in ",
 			filename);
     field->mefpos = mefpos;
+
 /*-- Check that the image exists and read important info (image size, etc...)*/
     readimagehead(field);
     if (cat->ntab>1)
