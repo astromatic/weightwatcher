@@ -193,7 +193,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
           case P_BOOL:
             if (!value || value[0]==(char)'#')
               error(EXIT_FAILURE, keyword," keyword has no value!");
-            if (cp = strchr("yYnN", (int)value[0]))
+            if ((cp = strchr("yYnN", (int)value[0])))
               *(int *)(key[nkey].ptr) = (tolower((int)*cp)=='y')?1:0;
             else
               error(EXIT_FAILURE, keyword, " value must be Y or N");
@@ -214,7 +214,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
               {
               if (i>=key[nkey].nlistmax)
                 error(EXIT_FAILURE, keyword, " has too many members");
-              if (cp = strchr("yYnN", (int)value[0]))
+              if ((cp = strchr("yYnN", (int)value[0])))
                 ((int *)(key[nkey].ptr))[i] = (tolower((int)*cp)=='y')?1:0;
               else
                 error(EXIT_FAILURE, keyword, " value must be Y or N");

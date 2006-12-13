@@ -449,7 +449,7 @@ void	readimagehead(picstruct *field)
   FITSTOS("OBJECT  ", field->ident, "Unnamed");
 
 /*----------------------------- Compression --------------------------------*/
-  if (fitsread(buf, "IMAGECOD", st, H_STRING, T_STRING)==RETURN_OK)
+  if ((fitsread(buf, "IMAGECOD", st, H_STRING, T_STRING)==RETURN_OK))
     {
     if (!strncmp(st, "NONE", 4))
       field->compress_type = ICOMPRESS_NONE;

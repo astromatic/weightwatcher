@@ -91,8 +91,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       {
       if (!(field->file = fopen(field->filename, "rb+")))
         error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
-      fseek(field->file,0L,SEEK_END);
-  /*  printf("This is the end of file %ld\n",ftell(field->file)); */
+      fseek(field->file, 0L, SEEK_END);
       }
     if (fitsfind(field->fitshead, "END     ")+7 >= field->fitsheadsize/80)
       {

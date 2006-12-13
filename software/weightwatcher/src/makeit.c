@@ -9,7 +9,7 @@
 *
 *       Contents:       Main program
 *
-*       Last modify:    11/04/2006
+*       Last modify:    13/12/2006
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -47,7 +47,7 @@ void	makeit(void)
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
-   unsigned long area, area0, arposw, arposf;
+   unsigned long area, area0, arposw, arposf,headposf;
    float        wwlim;
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
@@ -193,16 +193,15 @@ void	makeit(void)
 /*---- We first make a dummy copy of a FLAG input-image as a reference */
       QMALLOC(field, picstruct, 1);
       *field = ffield?**ffield:**wfield;
-
-      offield = newfield(prefs.oflag_name, FLAG_FIELD, ffield? *ffield :
-                *wfield, ext, next);
 /*---- Select the output FLAG image # of bits per pixel */
       if (maxbit >= (1<<15))
-        offield->bitpix = BP_LONG;
+        field->bitpix = BP_LONG;
       else if (maxbit >= (1<<7))
-        offield->bitpix = BP_SHORT;
+        field->bitpix = BP_SHORT;
       else
-        offield->bitpix = BP_BYTE;
+        field->bitpix = BP_BYTE;
+      offield = newfield(prefs.oflag_name, FLAG_FIELD, field, ext, next);
+      free(field);
       stripsize = offield->stripheight*offield->width;
       ofstrip = (char *)offield->strip;
       bowl = offield->npix;
@@ -327,9 +326,7 @@ void	makeit(void)
           flag = (FLAGTYPE *)offield->strip;
           for (npix = spoonful; npix--;)
             area += ((*(flag++)&flagmask)!=0);
-        /*   farea = 1. - (double)(area)/(double)(width*height); */
           }
-
         if (offield->bitpix!=BP_LONG)
           {
           flag = (FLAGTYPE *)offield->strip;
@@ -421,8 +418,9 @@ void	makeit(void)
       if (prefs.getarea)
         {
         arposf=ftell(offield->file);
+        headposf=arposf-(offield->npix*offield->bytepix)-padsize-offield->fitsheadsize;
 /* -- writing EFF_AREA keyword in flag header  */
-        fseek(offield->file,offield->mefpos,SEEK_SET);
+        fseek(offield->file,headposf,SEEK_SET);
         fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
         fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
         QFWRITE(offield->fitshead,offield->fitsheadsize,
