@@ -2,6 +2,7 @@
 # Copyright (C) 2003-2004 Emmanuel Bertin.
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
+dist_pkgdata_DATA	= xsl/ww.xsl
 EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYING \
 			  HISTORY INSTALL README THANKS \
 				acx_prog_cc_optim.m4 

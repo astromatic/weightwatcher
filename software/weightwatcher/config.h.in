@@ -108,6 +108,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Default URL of the XSLT filter */
+#undef XSL_URL
+
 /* off_t size */
 #undef _FILE_OFFSET_BITS
 

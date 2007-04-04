@@ -34,7 +34,7 @@
 /*
 Print the default preference parameters.
 */
-void	dumpprefs(void)
+void	dumpprefs(int state)
   {
    char	**dp;
 
@@ -42,6 +42,8 @@ void	dumpprefs(void)
   while (**dp)
     if (**dp != '*')
       printf("%s\n",*(dp++));
+    else if (state)
+      printf("%s\n",*(dp++)+1);
     else
       dp++;
   return;

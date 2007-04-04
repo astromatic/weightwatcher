@@ -9,7 +9,7 @@
 *
 *       Contents:       Main program
 *
-*       Last modify:    13/12/2006
+*       Last modify:    04/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include "define.h"
 #include "globals.h"
@@ -30,6 +31,8 @@
 #include "prefs.h"
 #include "vector.h"
 #include "readimage.h"
+
+time_t		thetime, thetime2;
 
 /********************************** makeit ***********************************/
 void	makeit(void)
@@ -47,11 +50,12 @@ void	makeit(void)
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
-   unsigned long area, area0, arposw, arposf,headposf;
+   unsigned long area, area0, arposw, arposf, headposw, headposf;
    float        wwlim;
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
+   struct tm		*tm;
 
 /* Install the signal-catching routines for temporary file cleanup */
 #ifdef USE_THREADS
@@ -59,6 +63,14 @@ void	makeit(void)
 #else
   install_cleanup(NULL);
 #endif
+
+/* Processing start date and time */
+  thetime = time(NULL);
+  tm = localtime(&thetime);
+  sprintf(prefs.sdate_start,"%04d-%02d-%02d",
+        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+  sprintf(prefs.stime_start,"%02d:%02d:%02d",
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
 
   field = NULL; /* Avoid gcc -Wall warnings */
   owfield = offield = NULL;     /* No output weights or flags is the default */
@@ -369,7 +381,7 @@ void	makeit(void)
       endfield(ffield[i]);
     free(ffield);
 
-/*-- Pad the written FITS files */
+/* Adding information on effective area */
     if (prefs.getarea)
       {
       FPRINTF(OUTPUT, "\n \n");
@@ -378,6 +390,15 @@ void	makeit(void)
         {
         farea0 = (double)(area0)/(double)(width*height);
         FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
+        arposw=ftell(owfield->file);
+        headposw=arposw-(owfield->npix*owfield->bytepix)
+             -owfield->fitsheadsize;
+        /* -- writing EFF_AREA keyword in weight header  */
+        fseek(owfield->file,headposw,SEEK_SET);
+        fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+        QFWRITE(owfield->fitshead,owfield->fitsheadsize,
+               owfield->file, owfield->rfilename);
+        fseek(owfield->file,arposw,SEEK_SET);
         }
       if (offield)
         {
@@ -388,38 +409,10 @@ void	makeit(void)
         FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
         FPRINTF(OUTPUT, "= %ld\n",area);
         FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",farea);
-        }
-      FPRINTF(OUTPUT, "\n");
-      }
-    NFPRINTF(OUTPUT, "Closing files...");
-    QCALLOC(charpix, char, FBSIZE);
-    if (owfield)
-      {
-      padsize = (FBSIZE -((owfield->npix*sizeof(PIXTYPE))%FBSIZE)) % FBSIZE;
-      if (padsize)
-        QFWRITE(charpix, padsize, owfield->file, owfield->rfilename);
-      if (prefs.getarea)
-        {
-        arposw=ftell(owfield->file);
-/* -- writing EFF_AREA keyword in weight header  */
-        fseek(owfield->file,owfield->mefpos,SEEK_SET);
-        fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
-        QFWRITE(owfield->fitshead,owfield->fitsheadsize,
-               owfield->file, owfield->rfilename);
-        fseek(owfield->file,arposw,SEEK_SET);
-        }
-      endfield(owfield);
-      }
-    if (offield)
-      {
-      padsize = (FBSIZE -((offield->npix*offield->bytepix)%FBSIZE)) % FBSIZE;
-      if (padsize)
-        QFWRITE(charpix, padsize, offield->file, offield->rfilename);
-      if (prefs.getarea)
-        {
         arposf=ftell(offield->file);
-        headposf=arposf-(offield->npix*offield->bytepix)-padsize-offield->fitsheadsize;
-/* -- writing EFF_AREA keyword in flag header  */
+        headposf=arposf-(offield->npix*offield->bytepix)
+             -offield->fitsheadsize;
+        /* -- writing EFF_AREA keyword in flag header  */
         fseek(offield->file,headposf,SEEK_SET);
         fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
         fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
@@ -427,6 +420,23 @@ void	makeit(void)
                offield->file, offield->rfilename);
         fseek(offield->file,arposf,SEEK_SET);
         }
+      FPRINTF(OUTPUT, "\n");
+      }
+    NFPRINTF(OUTPUT, "Closing files...");
+    QCALLOC(charpix, char, FBSIZE);
+/*-- Pad the written FITS files */
+    if (owfield)
+      {
+      padsize = (FBSIZE -((owfield->npix*sizeof(PIXTYPE))%FBSIZE)) % FBSIZE;
+      if (padsize)
+        QFWRITE(charpix, padsize, owfield->file, owfield->rfilename);
+      endfield(owfield);
+      }
+    if (offield)
+      {
+      padsize = (FBSIZE -((offield->npix*offield->bytepix)%FBSIZE)) % FBSIZE;
+      if (padsize)
+        QFWRITE(charpix, padsize, offield->file, offield->rfilename);
       endfield(offield);
       }
     free(charpix);

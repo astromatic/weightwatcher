@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	2/03/2006
+*	Last modify:	04/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -62,6 +62,15 @@ typedef struct
   enum	{QUIET, NORM, FULL}		verbose_type;	/* display type */
 /* Multithreading */
   int		nthreads;			/* Number of active threads */
+/* Misc */
+  int		xml_flag;			/* Write XML file? */
+  char		xml_name[MAXCHAR];		/* XML file name */
+  char		xsl_name[MAXCHAR];		/* XSL file name (or URL) */
+  char		sdate_start[12];		/* ww start date */
+  char		stime_start[12];		/* ww start time */
+  char		sdate_end[12];			/* ww end date */
+  char		stime_end[12];			/* ww end time */
+  double	time_diff;			/* Execution time */
   }	prefstruct;
 
   prefstruct	prefs;
@@ -70,7 +79,7 @@ typedef struct
 /*-------------------------------- protos -----------------------------------*/
 extern int	cistrcmp(char *cs, char *ct, int mode);
 
-extern void	dumpprefs(void),
+extern void	dumpprefs(int state),
 		readprefs(char *filename,char **argkey,char **argval,int narg),
 		useprefs(void);
 

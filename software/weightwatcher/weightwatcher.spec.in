@@ -23,10 +23,10 @@ used in astronomical image-processing packages like Swarp or SExtractor.
 
 %build
 if test "$GCCFLAGS"; then
-./configure --enable-static --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/
+./configure --enable-static --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/ww/ww.xsl
 make CFLAGS="$GCCFLAGS"
 else
-./configure --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/
+./configure --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/ww/ww.xsl
 make
 fi
 

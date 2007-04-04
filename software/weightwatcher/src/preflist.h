@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	02/03/2006
+*	Last modify:	04/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -58,6 +58,9 @@ pkeystruct key[] =
   {"MEMORY_BUFSIZE", P_INT, &prefs.mem_bufsize, 1,1<<30},
   {"VERBOSE_TYPE", P_KEY, &prefs.verbose_type, 0,0, 0.0,0.0,
    {"QUIET","NORMAL","FULL",""}},
+  {"XML_NAME", P_STRING, prefs.xml_name},
+  {"XSL_URL", P_STRING, prefs.xsl_name},
+  {"WRITE_XML", P_BOOL, &prefs.xml_flag},
   {""}
  };
  
@@ -105,6 +108,11 @@ char *default_prefs[] =
 "GETAREA_FLAGS   1               # Bits which will be accounted in the area", 
 "MEMORY_BUFSIZE  256             # Buffer size in lines",
 "VERBOSE_TYPE    NORMAL          # can be \"QUIET\", \"NORMAL\" or \"FULL\"",
+"WRITE_XML       Y               # Write XML file (Y/N)?",
+"XML_NAME        ww.xml          # Filename for XML output",
+"*XSL_URL        " XSL_URL,
+"*                                # Filename for XSL style-sheet",
+" ",
 ""
 };
 
