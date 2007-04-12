@@ -69,6 +69,8 @@ vecstruct	*newvec(char *filename)
   npoly = nseg = nline = 0;
 
 /* Read data */
+
+  str2 = NULL;
   while (fgets(str, MAXPOLYCHAR, vector->file))
     {
 /* Make almost sure from first line that we are accessing the right data */
@@ -83,30 +85,43 @@ vecstruct	*newvec(char *filename)
       nline = 1;
       }
 
+    if (strstr(str, "fk5"))
+      {
+      error(EXIT_FAILURE, vector->filename, " is a WCS"
+		" DS9/SAOimage vector-file (not yet implemented!)");
+      }
+
 /*-- Examine current input line (discard empty and comment lines) */
     if (strstr(str, "tile"))
       {
       str2=strtok(str, vectok);
-      ext=atoi(strtok(NULL, vectok))-1;
+      if (*str2 == (char)'#')
+        strtok(NULL, vectok);
+      ext=atoi(strtok(NULL, vectok));
       str2 = strtok(NULL, vectok);
       }
     else
       {
-      ext = 0;
-      str2=strtok(str, vectok);
+      if (!ext)
+        ext = 0;      
+      str2=strtok(str, vectok);      
       }
 
     if (str2 && strstr(str2,"image"))
       str2 = strtok(NULL, vectok);
 
     if (str2 && !(strstr(str2, "polygon")))
-	continue;
-      
+      continue;
+
+    if (!str2)
+      continue;
 
 /*-- Decode the POLYGON information as a set of segments */
     seg0 = seg;
     nseg0 = nseg;
 
+    if (ext)
+      ext--;
     while(1)
       {
       if (!(str2 = strtok(NULL, vectok)) || *str2=='#')
