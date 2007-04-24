@@ -46,7 +46,7 @@ void	makeit(void)
    FLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, flagmask, fmask,wmask,fval, maxbit;
-   int		i,j, t, width, height, padsize, ext, next, ntab;
+   int		i,j, t, xt, width, height, padsize, ext, next, ntab;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
@@ -100,8 +100,6 @@ void	makeit(void)
     next++;
     }
 
-  free_cat(&cat, 1);
-
 /* Open vector images */
   if (prefs.nvec_name)
     QMALLOC(vec, vecstruct *, prefs.nvec_name)
@@ -109,12 +107,13 @@ void	makeit(void)
     vec = NULL;
   for (i=0; i<prefs.nvec_name; i++)
     {
-    vector = vec[i] = newvec(prefs.vec_name[i]);
+    vector = vec[i] = newvec(prefs.vec_name[i],cat);
     vector->ofmask = prefs.vec_mask[i];
     vector->weight = prefs.vec_weight[i];
     if (vector->ofmask > maxbit)
       maxbit = vector->ofmask;
     }
+  free_cat(&cat, 1);  
   width = height = 0;	/* Avoid gcc -Wall warnings */
   for (ext=0; ext<next; ext++)
 /* Open weight images */
@@ -441,7 +440,6 @@ void	makeit(void)
       }
     free(charpix);
     }
-
 
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)

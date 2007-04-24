@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	25/07/2006
+*	Last modify:	24/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -27,6 +27,7 @@
 #include "globals.h"
 #include "field.h"
 #include "fits/fitscat.h"
+#include "fitswcs.h"
 #include "prefs.h"
 #include "vector.h"
 
@@ -37,15 +38,20 @@ static void	chsort(crosstruct *ra, int n);
 Returns a pointer to a new polygon, and initialize local context buffer:
 ready to go!
 */
-vecstruct	*newvec(char *filename)
+vecstruct	*newvec(char *filename, catstruct *cat)
 
   {
    vecstruct	*vector;
    segstruct	*seg, *seg0;
+   wcsstruct    *wcs;
+   tabstruct    *tab;
    static char	str[MAXPOLYCHAR];
-   float	dy;
+   float	dy, tmp, tmp2;
    char		*str2;
-   int		i, npoly, nseg,nseg0, nline, ext;
+   int		i, npoly, nseg,nseg0, nline, ext, fk5;
+
+   tab = NULL;
+   fk5 = 0;
 
 /* First allocate memory for the new vector (and nullify pointers) */
   QCALLOC(vector, vecstruct, 1);
@@ -85,12 +91,6 @@ vecstruct	*newvec(char *filename)
       nline = 1;
       }
 
-    if (strstr(str, "fk5"))
-      {
-      error(EXIT_FAILURE, vector->filename, " is a WCS"
-		" DS9/SAOimage vector-file (not yet implemented!)");
-      }
-
 /*-- Examine current input line (discard empty and comment lines) */
     if (strstr(str, "tile"))
       {
@@ -109,6 +109,18 @@ vecstruct	*newvec(char *filename)
 
     if (str2 && strstr(str2,"image"))
       str2 = strtok(NULL, vectok);
+
+    if (str2 && strstr(str, "fk5"))
+      {
+      fk5 = 1;
+      warning(vector->filename, " is a WCS DS9/SAOimage vector-file: "
+                "number of extensions forced to 1!!");
+      ext = 0;
+      for (tab=cat->tab; tab->naxis<2; tab=tab->nexttab);
+      wcs = read_wcs (tab);
+      str2 = strtok(NULL, vectok);    
+      }
+
 
     if (str2 && !(strstr(str2, "polygon")))
       continue;
@@ -135,10 +147,23 @@ vecstruct	*newvec(char *filename)
         }
       else
         seg++;
-      seg->x1 = (seg-1)->x2 = atof(str2) - 1.0;	/* 1st pixel is "1" in FITS */
+      tmp = atof(str2);
+      if (fk5)
+        tmp2 = wcs->crpix[0] + (tmp - wcs->crval[0]) * wcs->cd[0];
+      else
+        tmp2 = tmp;
+printf("%f %f \n",tmp, tmp2);
+      seg->x1 = (seg-1)->x2 = tmp2 - 1.0;       /* 1st pixel is "1" in FITS */
+
       if (!(str2 = strtok(NULL, vectok)))
         error(EXIT_FAILURE, "Malformed POLYGON in ", vector->filename);
-      seg->y1 = (seg-1)->y2 = atof(str2) - 1.0;	/* 1st pixel is "1" in FITS */
+      tmp = atof(str2);
+      if (fk5)
+        tmp2 = wcs->crpix[1] + (tmp - wcs->crval[1]) * wcs->cd[1];
+      else
+        tmp2 = tmp;
+      seg->y1 = (seg-1)->y2 = tmp2 - 1.0;       /* 1st pixel is "1" in FITS */
+
       seg->ext = ext;
       seg->poly = npoly;
       }
@@ -198,7 +223,7 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
 /* Check that an output map is requested */
   if (!wfield && !ffield)
     return;
-  
+
   w = wfield? wfield->width : ffield->width;
   yh = bufsize/w;
 /* Allocate memory for the list of crossing points */

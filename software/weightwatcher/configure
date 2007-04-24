@@ -5946,7 +5946,7 @@ echo "${ECHO_T}I will compile using:  $CC $CFLAGS" >&6
 echo "$as_me:$LINENO: result: I will link using:     $CC $LDFLAGS $LIBS" >&5
 echo "${ECHO_T}I will link using:     $CC $LDFLAGS $LIBS" >&6
 
-                                                            ac_config_files="$ac_config_files Makefile man/Makefile src/Makefile src/fits/Makefile weightwatcher.spec man/ww.1"
+                                                                      ac_config_files="$ac_config_files Makefile man/Makefile src/Makefile src/fits/Makefile src/wcs/Makefile weightwatcher.spec man/ww.1"
 
 
 
@@ -6455,6 +6455,7 @@ do
   "man/Makefile" ) CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/fits/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/fits/Makefile" ;;
+  "src/wcs/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/wcs/Makefile" ;;
   "weightwatcher.spec" ) CONFIG_FILES="$CONFIG_FILES weightwatcher.spec" ;;
   "man/ww.1" ) CONFIG_FILES="$CONFIG_FILES man/ww.1" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;

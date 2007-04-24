@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP, Leiden & ESO)
+*	Author:		E.BERTIN (IAP, Leiden & ESO) C. MARMO (IAP)
 *
 *	Contents:	Vector structures.
 *
-*	Last modify:	11/04/2006
+*	Last modify:	24/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -55,7 +55,7 @@ typedef struct cross
 
 /*---------------------------------- protos --------------------------------*/
 
-vecstruct	*newvec(char *filename);
+vecstruct	*newvec(char *filename, catstruct *cat);
 
 void		endvec(vecstruct *vector),
 		vec_to_map(vecstruct *vector, picstruct *wfield,

@@ -162,5 +162,5 @@ fi
 AC_MSG_RESULT([I will compile using:  $CC $CFLAGS])
 AC_MSG_RESULT([I will link using:     $CC $LDFLAGS $LIBS])
 
-AC_CONFIG_FILES(Makefile man/Makefile src/Makefile src/fits/Makefile weightwatcher.spec man/ww.1)
+AC_CONFIG_FILES(Makefile man/Makefile src/Makefile src/fits/Makefile src/wcs/Makefile weightwatcher.spec man/ww.1)
 AC_OUTPUT
