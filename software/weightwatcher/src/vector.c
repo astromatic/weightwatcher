@@ -46,11 +46,13 @@ vecstruct	*newvec(char *filename, catstruct *cat)
    wcsstruct    *wcs;
    tabstruct    *tab;
    static char	str[MAXPOLYCHAR];
-   float	dy, tmp, tmp2;
+   float	dy, tmpx, tmpy;
+   double       tmp2[2], tmp[2];
    char		*str2;
    int		i, npoly, nseg,nseg0, nline, ext, fk5;
 
    tab = NULL;
+   wcs = NULL;
    fk5 = 0;
 
 /* First allocate memory for the new vector (and nullify pointers) */
@@ -147,22 +149,25 @@ vecstruct	*newvec(char *filename, catstruct *cat)
         }
       else
         seg++;
-      tmp = atof(str2);
-      if (fk5)
-        tmp2 = wcs->crpix[0] + (tmp - wcs->crval[0]) * wcs->cd[0];
-      else
-        tmp2 = tmp;
-printf("%f %f \n",tmp, tmp2);
-      seg->x1 = (seg-1)->x2 = tmp2 - 1.0;       /* 1st pixel is "1" in FITS */
+      tmpx = atof(str2);
 
       if (!(str2 = strtok(NULL, vectok)))
         error(EXIT_FAILURE, "Malformed POLYGON in ", vector->filename);
-      tmp = atof(str2);
+      tmpy = atof(str2);
+
       if (fk5)
-        tmp2 = wcs->crpix[1] + (tmp - wcs->crval[1]) * wcs->cd[1];
+        {
+        tmp[0] = tmpx;
+        tmp[1] = tmpy;
+        wcs_to_raw(wcs, tmp, tmp2);
+        seg->x1 = (seg-1)->x2 = tmp2[0] - 1.0;    /* 1st pixel is "1" in FITS */
+        seg->y1 = (seg-1)->y2 = tmp2[1] - 1.0;    /* 1st pixel is "1" in FITS */
+        }
       else
-        tmp2 = tmp;
-      seg->y1 = (seg-1)->y2 = tmp2 - 1.0;       /* 1st pixel is "1" in FITS */
+        {
+        seg->x1 = (seg-1)->x2 = tmpx - 1.0;       /* 1st pixel is "1" in FITS */
+        seg->y1 = (seg-1)->y2 = tmpy - 1.0;       /* 1st pixel is "1" in FITS */
+        }
 
       seg->ext = ext;
       seg->poly = npoly;
@@ -196,6 +201,7 @@ printf("%f %f \n",tmp, tmp2);
 		vector->ident, npoly);
 
 /* Close file and exit */
+  end_wcs(wcs);
   fclose(vector->file);
 
   return vector;
