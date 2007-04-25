@@ -31,6 +31,7 @@
 #include "prefs.h"
 #include "vector.h"
 #include "readimage.h"
+#include "xml.h"
 
 time_t		thetime, thetime2;
 
@@ -46,7 +47,7 @@ void	makeit(void)
    FLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, flagmask, fmask,wmask,fval, maxbit;
-   int		i,j, t, xt, width, height, padsize, ext, next, ntab;
+   int		i,j, t, width, height, padsize, ext, next, ntab;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
@@ -71,6 +72,17 @@ void	makeit(void)
         tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
   sprintf(prefs.stime_start,"%02d:%02d:%02d",
         tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+  NFPRINTF(OUTPUT, "");
+  QPRINTF(OUTPUT,
+        "----- %s %s started on %s at %s with %d thread%s\n\n",
+                BANNER,
+                MYVERSION,
+                prefs.sdate_start,
+                prefs.stime_start,
+                prefs.nthreads,
+                prefs.nthreads>1? "s":"");
+
 
   field = NULL; /* Avoid gcc -Wall warnings */
   owfield = offield = NULL;     /* No output weights or flags is the default */
@@ -99,6 +111,9 @@ void	makeit(void)
       continue;
     next++;
     }
+
+  if (prefs.xml_flag)
+    init_xml(next);
 
 /* Open vector images */
   if (prefs.nvec_name)
@@ -429,6 +444,9 @@ void	makeit(void)
       padsize = (FBSIZE -((owfield->npix*sizeof(PIXTYPE))%FBSIZE)) % FBSIZE;
       if (padsize)
         QFWRITE(charpix, padsize, owfield->file, owfield->rfilename);
+/*-- Update XML */
+      if (prefs.xml_flag)
+        update_xml(owfield, ext);
       endfield(owfield);
       }
     if (offield)
@@ -436,10 +454,33 @@ void	makeit(void)
       padsize = (FBSIZE -((offield->npix*offield->bytepix)%FBSIZE)) % FBSIZE;
       if (padsize)
         QFWRITE(charpix, padsize, offield->file, offield->rfilename);
+/*-- Update XML */
+      if (prefs.xml_flag)
+        update_xml(offield, ext);
       endfield(offield);
+
       }
     free(charpix);
     }
+
+/* Processing end date and time */
+  thetime2 = time(NULL);
+  tm = localtime(&thetime2);
+  sprintf(prefs.sdate_end,"%04d-%02d-%02d",
+        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+  sprintf(prefs.stime_end,"%02d:%02d:%02d",
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
+  prefs.time_diff = difftime(thetime2, thetime);
+
+/* Write XML */
+
+  if (prefs.xml_flag)
+    {
+    NFPRINTF(OUTPUT, "Writing XML file...");
+    write_xml(prefs.xml_name);
+    end_xml();
+    }
+
 
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)

@@ -29,7 +29,7 @@
 #include "fits/fitscat.h"
 #include "key.h"
 #include "prefs.h"
-#include "types.h"
+#include "field.h"
 #include "xml.h"
 
 extern time_t		thetime,thetime2;	/* from makeit.c */
@@ -91,12 +91,13 @@ NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
 VERSION	02/03/2007
  ***/
-int	update_xml(picstruct *field, int nfield)
+int	update_xml(picstruct *field, int nxml)
   {
+/*
   ww_xml[nxml] = field;
   nfield_xml[nxml] = nfield;
   nxml++;
-
+*/
   return EXIT_SUCCESS;
   }
 
@@ -156,10 +157,6 @@ int	write_xml_header(FILE *file)
   fprintf(file, " <DESCRIPTION>Data related to %s"
         "</DESCRIPTION>\n", BANNER);
   fprintf(file, " <INFO name=\"QUERY_STATUS\" value=\"OK\" />\n");
-  sprintf(sysname, "ICRS");
-
-  fprintf(file, " <COOSYS ID=\"J2000\" equinox=\"J2000\""
-        " epoch=\"2000.0\" system=\"ICRS\"/>\n");
 
   return RETURN_OK;
   }
@@ -184,7 +181,7 @@ int	write_xml_meta(FILE *file, char *error)
    int			i,d,n, nmed, ntot;
 
 /* Processing date and time if msg error present */
-  if (error)
+ /*  if (error)
     {
     thetime2 = time(NULL);
     tm = localtime(&thetime2);
@@ -193,7 +190,7 @@ int	write_xml_meta(FILE *file, char *error)
     sprintf(prefs.stime_end,"%02d:%02d:%02d",
         tm->tm_hour, tm->tm_min, tm->tm_sec);
     prefs.time_diff = difftime(thetime2, thetime);
-    }
+    } */
 
 /* Username */
   psuser = pspath = pshost = NULL;
@@ -245,6 +242,7 @@ int	write_xml_meta(FILE *file, char *error)
         " ucd=\"meta.dataset\" value=\"%s\"/>\n",
         pspath);
 
+/*
   if (error)
     {
     fprintf(file, "\n  <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -260,24 +258,27 @@ int	write_xml_meta(FILE *file, char *error)
     fprintf(file, "  <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         "!!!!!!!!!!!!!!!!!!!! -->\n\n");
     }
-
+*/
 /* Meta-data for the ww processing */
-  fprintf(file, "  <TABLE ID=\"WW\" name=\"ww\">\n");
-  fprintf(file, "   <DESCRIPTION>Metadata and stats about ww run "
+/*
+  fprintf(file, "  <TABLE ID=\"OutFields\" name=\"OutFields\">\n");
+  fprintf(file, "   <DESCRIPTION>Metadata about the output images gathered by "
         "%s</DESCRIPTION>\n", BANNER);
   fprintf(file, "   <!-- Nextensions may be 0"
         " if an error occurred early in the processing -->\n");
+
   fprintf(file, "   <PARAM name=\"NExtensions\" datatype=\"int\""
-        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", nxmlmax);
+        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", next);
   fprintf(file, "   <!-- CurrExtension may differ from Nextensions"
         " if an error occurred -->\n");
   fprintf(file, "   <PARAM name=\"CurrExtension\" datatype=\"int\""
-        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", nxml);
+        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", ext);
+*/
+/*
   fprintf(file, "   <DATA><TABLEDATA>\n");
   for (n=0; n<nxml; n++)
     {
     field = ww_xml[n];
-/*
     fprintf(file, "    <TR>\n"
         "     <TD>%d</TD><TD>%d</TD><TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
         "     <TD>%d",
@@ -337,11 +338,12 @@ int	write_xml_meta(FILE *file, char *error)
         psf->moffat[nmed].residuals,
         residuals_best,
         residuals_worse);
-    }
-*/
-  fprintf(file, "   </TABLEDATA></DATA>\n");
-  fprintf(file, "  </TABLE>\n");
 
+    }
+  fprintf(file, "   </TABLEDATA></DATA>\n");
+
+  fprintf(file, "  </TABLE>\n");
+*/
 
 /* Warnings */
   fprintf(file, "  <TABLE ID=\"Warnings\" name=\"Warnings\">\n");
@@ -359,9 +361,11 @@ int	write_xml_meta(FILE *file, char *error)
     fprintf(file, "    <TR><TD>%10.10s</TD><TD>%8.8s</TD><TD>%s</TD></TR>\n",
         str, str+11, str+22);
   fprintf(file, "   </TABLEDATA></DATA>\n");
+
   fprintf(file, "  </TABLE>\n");
 
 /* Configuration file */
+/*
   fprintf(file, "  <RESOURCE ID=\"Config\" name=\"Config\">\n");
   fprintf(file, "   <DESCRIPTION>%s configuration</DESCRIPTION>\n", BANNER);
   fprintf(file,
@@ -376,9 +380,11 @@ int	write_xml_meta(FILE *file, char *error)
         " ucd=\"obs.param;meta.file\" value=\"%s\"/>\n",
         prefs.prefs_name);
 
+/*
   if (!error)
     {
 /*-- PSF model */
+/*
     write_xmlconfigparam(file, "PSF_Name", "",
                 "meta.id;meta.file","%s");
     write_xmlconfigparam(file, "PSF_Accuracy", "",
@@ -393,6 +399,7 @@ int	write_xml_meta(FILE *file, char *error)
                 "meta.code","%c");
 
 /*-- Sample selection */
+/*
     write_xmlconfigparam(file, "PSF_AutoSelect", "",
                 "meta.code","%c");
     write_xmlconfigparam(file, "PSF_FWHMRange", "pix",
@@ -409,6 +416,7 @@ int	write_xml_meta(FILE *file, char *error)
                 "meta.number;instr.pixel;stat.max","%d");
 
 /*-- PSF dependencies */
+/*
     write_xmlconfigparam(file, "Context_Keys", "",
                 "meta.id;src", "%s");
     write_xmlconfigparam(file, "Context_Groups", "",
@@ -421,13 +429,14 @@ int	write_xml_meta(FILE *file, char *error)
                 "meta.id;meta.file;meta.fits", "%s");
 
 /*-- Miscellaneous */
+/*
     write_xmlconfigparam(file, "Verbose_Type", "", "meta.code","%s");
     write_xmlconfigparam(file, "Write_XML", "", "meta.code","%s");
     write_xmlconfigparam(file, "NThreads", "",
                 "meta.number;meta.software", "%d");
     }
-
   fprintf(file, "  </RESOURCE>\n");
+*/
   fprintf(file, " </RESOURCE>\n");
 
   return RETURN_OK;
@@ -630,9 +639,11 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
                 " arraysize=\"*\" ucd=\"%s\" value=\"\"/>\n",
                 name, ucd);
       break;
+/*
     default:
         error(EXIT_FAILURE, "*Internal Error*: Type Unknown",
                 " in write_xmlconfigparam()");
+*/
     }
 
   return RETURN_OK;

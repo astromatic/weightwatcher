@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.7.6, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.7.7, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_CONFIG_HEADER(config.h)
@@ -80,12 +80,31 @@ AC_ARG_ENABLE(efence,
         use_efence="no"
 	AC_MSG_RESULT([no]))
 
+# Set the data directory to a true absolute path
+if test "x${datadir}" = 'x${prefix}/share'; then
+  if test "x${prefix}" = "xNONE"; then
+    datadir2="${ac_default_prefix}/share"
+  else
+    datadir2="${prefix}/share"
+  fi
+elif test "x${datadir}" = 'x${datarootdir}'; then
+  if test "x${datarootdir}" = 'x${prefix}/share'; then
+    if test "x${prefix}" = "xNONE"; then
+      datadir2="${ac_default_prefix}/share"
+    else
+      datadir2="${prefix}/share"
+    fi
+  fi
+else
+  datadir2="${datadir}"
+fi
+
 # Provide a special option for the default XSLT URL
 AC_ARG_WITH(xsl_url,
         [AC_HELP_STRING([--with-xsl_url=<default URL for XSLT filter>],
         [Provide an alternative default URL of the XSLT filter])],
     [xsl_url=$withval],
-    [xsl_url="file://$datadir2/$PACKAGE_NAME/$PACKAGE_NAME.xsl"]
+    [xsl_url="file://$datadir2/$PACKAGE_NAME/ww.xsl"]
     )
 
 AC_DEFINE_UNQUOTED([XSL_URL], "$xsl_url",[Default URL of the XSLT filter])

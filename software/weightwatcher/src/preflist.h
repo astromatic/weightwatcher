@@ -9,12 +9,18 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	04/04/2007
+*	Last modify:	25/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
 
 #include "key.h"
+
+#ifdef  USE_THREADS
+#define	THREADS_PREFMAX	THREADS_NMAX
+#else
+#define	THREADS_PREFMAX	65535
+#endif
 
 /*-------------------------------- initialization ---------------------------*/
 int	idummy;
@@ -61,6 +67,7 @@ pkeystruct key[] =
   {"XML_NAME", P_STRING, prefs.xml_name},
   {"XSL_URL", P_STRING, prefs.xsl_name},
   {"WRITE_XML", P_BOOL, &prefs.xml_flag},
+  {"NTHREADS", P_INT, &prefs.nthreads, 0, THREADS_PREFMAX},
   {""}
  };
  
@@ -112,6 +119,13 @@ char *default_prefs[] =
 "XML_NAME        ww.xml          # Filename for XML output",
 "*XSL_URL        " XSL_URL,
 "*                                # Filename for XSL style-sheet",
+#ifdef USE_THREADS
+"NTHREADS        0               # Number of simultaneous threads for",
+"                                # the SMP version of " BANNER,
+"                                # 0 = automatic",
+#else
+"NTHREADS        1               # 1 single thread",
+#endif
 " ",
 ""
 };

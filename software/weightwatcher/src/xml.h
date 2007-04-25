@@ -18,8 +18,9 @@
 #include	"config.h"
 #endif
 
-#ifndef _TYPE_H_
-#include "types.h"
+
+#ifndef _FIELD_H_
+#include "field.h"
 #endif
 
 /*----------------------------- Internal constants --------------------------*/
@@ -27,10 +28,16 @@
 #define	XSL_URL	"."
 #endif
 /*--------------------------------- typedefs --------------------------------*/
+typedef struct
+  {
+  char         fieldname;               /* name of the file */
+  char         fieldtype;               /* F flag, W weight */
+  int          ext;                     /* extension */
+  }	xmlstruct;
 /*------------------------------- functions ---------------------------------*/
 
 extern int	init_xml(int next),
-                update_xml(picstruct *field, int nfield),
+                update_xml(picstruct *field, int next),
                 write_xml(char *filename),
                 write_xml_header(FILE *file),
                 write_xml_meta(FILE *file, char *error),
