@@ -65,6 +65,9 @@ void	makeit(void)
   install_cleanup(NULL);
 #endif
 
+/* Install error logging */
+  error_installfunc(write_error);
+
 /* Processing start date and time */
   thetime = time(NULL);
   tm = localtime(&thetime);
@@ -413,6 +416,7 @@ void	makeit(void)
         QFWRITE(owfield->fitshead,owfield->fitsheadsize,
                owfield->file, owfield->rfilename);
         fseek(owfield->file,arposw,SEEK_SET);
+        offield->effarea = farea0;
         }
       if (offield)
         {
@@ -433,6 +437,7 @@ void	makeit(void)
         QFWRITE(offield->fitshead,offield->fitsheadsize,
                offield->file, offield->rfilename);
         fseek(offield->file,arposf,SEEK_SET);
+        offield->effarea = farea;
         }
       FPRINTF(OUTPUT, "\n");
       }
@@ -446,7 +451,7 @@ void	makeit(void)
         QFWRITE(charpix, padsize, owfield->file, owfield->rfilename);
 /*-- Update XML */
       if (prefs.xml_flag)
-        update_xml(owfield, ext);
+        update_xml(owfield, ext, "W");
       endfield(owfield);
       }
     if (offield)
@@ -456,7 +461,7 @@ void	makeit(void)
         QFWRITE(charpix, padsize, offield->file, offield->rfilename);
 /*-- Update XML */
       if (prefs.xml_flag)
-        update_xml(offield, ext);
+        update_xml(offield, ext, "F");
       endfield(offield);
 
       }
@@ -490,3 +495,24 @@ void	makeit(void)
   return;
   }
 
+/****** write_error ********************************************************
+PROTO	void    write_error(char *msg1, char *msg2)
+PURPOSE	Manage files in case of a catched error
+INPUT	a character string,
+        another character string
+OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION	23/02/2007
+ ***/
+void	write_error(char *msg1, char *msg2)
+  {
+   char	error[MAXCHAR];
+
+  sprintf(error, "%s%s", msg1,msg2);
+  if (prefs.xml_flag)
+    write_xmlerror(prefs.xml_name, error);
+  end_xml();
+
+  return;
+  }

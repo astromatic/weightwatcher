@@ -121,11 +121,9 @@
  <xsl:template name="ww">
   <xsl:for-each select="RESOURCE[@ID='MetaData']">
    <xsl:call-template name="RunInfo"/>
-<!--
    <xsl:for-each select="TABLE[@ID='OutFields']">
     <xsl:call-template name="outfields"/>
    </xsl:for-each>
--->
   </xsl:for-each>
  </xsl:template>
 
@@ -182,7 +180,6 @@
  </xsl:template>
 
 <!-- ********************* XSL template for OutFields ******************** -->
-<!--
   <xsl:template name="outfields">
    <xsl:variable name="imname" select="count(FIELD[@name='Image_Name']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="ext" select="count(FIELD[@name='Extension']/preceding-sibling::FIELD)+1"/>
@@ -212,7 +209,6 @@
     </TABLE>
    </p>
  </xsl:template>
--->
  <xsl:template name="Rest">
 </xsl:template>
 </xsl:stylesheet>

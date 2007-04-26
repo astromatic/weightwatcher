@@ -25,7 +25,6 @@
 
 #include "define.h"
 #include "globals.h"
-#include "field.h"
 #include "fits/fitscat.h"
 #include "prefs.h"
 #ifdef HAVE_PLPLOT
@@ -44,7 +43,6 @@ extern const char	notokstr[];
 int	main(int argc, char *argv[])
 
   {
-   static char	prefsname[MAXCHAR];
    char		**argkey, **argval;
    int		a, narg, opt, opt2;
 
@@ -60,7 +58,9 @@ int	main(int argc, char *argv[])
   QMALLOC(argval, char *, argc);
 
 /* Default parameters */
-  strcpy(prefsname, "default.ww");
+  prefs.command_line = argv;
+  prefs.ncommand_line = argc;
+  strcpy(prefs.prefs_name, "default.ww");
   narg= 0;
 
   for (a=1; a<argc; a++)
@@ -80,7 +80,7 @@ int	main(int argc, char *argv[])
           {
           case 'c':
             if (a<(argc-1))
-              strcpy(prefsname, argv[++a]);
+              strcpy(prefs.prefs_name, argv[++a]);
             break;
           case 'd':
             dumpprefs(opt2=='d' ? 1 : 0);
@@ -105,7 +105,7 @@ int	main(int argc, char *argv[])
       error(EXIT_SUCCESS,"SYNTAX: ", SYNTAX);
     }
 
-  readprefs(prefsname, argkey, argval, narg);
+  readprefs(prefs.prefs_name, argkey, argval, narg);
   useprefs();
 
   free(argkey);

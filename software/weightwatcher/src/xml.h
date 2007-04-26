@@ -3,7 +3,7 @@
 
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Part of:	PSFEx
+*	Part of:	WeightWatcher
 *
 *	Author:		E.BERTIN (IAP) C.MARMO (IAP)
 *
@@ -30,18 +30,19 @@
 /*--------------------------------- typedefs --------------------------------*/
 typedef struct
   {
-  char         fieldname;               /* name of the file */
-  char         fieldtype;               /* F flag, W weight */
-  int          ext;                     /* extension */
+  char         fieldname[80];               /* name of the file */
+  char         fieldtype[2];                /* F flag, W weight */
+  int          ext;                         /* extension */
+  float        effarea;                     /* effective surface */
   }	xmlstruct;
 /*------------------------------- functions ---------------------------------*/
 
 extern int	init_xml(int next),
-                update_xml(picstruct *field, int next),
+                update_xml(picstruct *field, int next, char *str),
                 write_xml(char *filename),
                 write_xml_header(FILE *file),
                 write_xml_meta(FILE *file, char *error),
                 write_xmlconfigparam(FILE *file, char *name, char *unit,
-                                char *ucd, char *format);
-extern void	end_xml(void),
-                write_xmlerror(char *filename, char *error);
+                                char *ucd, char *format),
+                end_xml(void);
+extern void	write_xmlerror(char *filename, char *error);

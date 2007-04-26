@@ -48,6 +48,7 @@ typedef struct
   double	bscale, bzero;		/* FITS scale and offset */
   void		*strip;			/* pointer to the image buffer */
   int		stripheight;		/* height  of a strip (in lines) */
+  double        effarea;                /* output effective area (if activated) */
 /* ---- image (de-)compression */
   enum {ICOMPRESS_NONE, ICOMPRESS_BASEBYTE, ICOMPRESS_PREVPIX}
 		compress_type;		/* image compression type */

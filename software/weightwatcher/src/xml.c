@@ -3,13 +3,13 @@
 
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Part of:	PSFEx
+*	Part of:	WeightWatcher
 *
 *	Author:		E.BERTIN (IAP) C.MARMO (IAP)
 *
 *	Contents:	XML logging.
 *
-*	Last modify:	04/04/2007
+*	Last modify:	26/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -36,7 +36,7 @@ extern time_t		thetime,thetime2;	/* from makeit.c */
 extern pkeystruct	key[];			/* from preflist.h */
 extern char		keylist[][32];		/* from preflist.h */
  
-picstruct		**ww_xml;
+xmlstruct		*ww_xml = NULL;
 int			*nfield_xml;
 int			nxml, nxmlmax;
 
@@ -53,7 +53,7 @@ VERSION	02/03/2007
  ***/
 int	init_xml(int next)
   {
-  QMALLOC(ww_xml, picstruct *, next);
+  QMALLOC(ww_xml, xmlstruct, next);
   QMALLOC(nfield_xml, int, next);
   nxml = 0;
   nxmlmax = next;
@@ -71,12 +71,11 @@ NOTES	-.
 AUTHOR	E. Bertin (IAP)
 VERSION	02/03/2007
  ***/
-void	end_xml(void)
+int	end_xml(void)
   {
   free(ww_xml);
-  free(nfield_xml);
 
-  return;
+  return EXIT_SUCCESS;
   }
 
 
@@ -91,13 +90,22 @@ NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
 VERSION	02/03/2007
  ***/
-int	update_xml(picstruct *field, int nxml)
+int	update_xml(picstruct *field, int next, char *str)
   {
-/*
-  ww_xml[nxml] = field;
-  nfield_xml[nxml] = nfield;
-  nxml++;
-*/
+
+    xmlstruct *x;
+
+  if (nxml < nxmlmax)
+    x = &ww_xml[nxml++];
+  else
+    x = &ww_xml[0];	/* Extra calls update the meta-data of output frame */
+
+  strcpy(x->fieldname,field->filename);
+  strcpy(x->fieldtype, str);
+  x->ext = next;
+  if (prefs.getarea)
+    x->effarea = field->effarea;
+
   return EXIT_SUCCESS;
   }
 
@@ -141,7 +149,6 @@ VERSION	06/10/2006
  ***/
 int	write_xml_header(FILE *file)
   {
-   char		sysname[16];
 
   fprintf(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(file, "<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>\n",
@@ -174,14 +181,14 @@ VERSION	28/03/2007
  ***/
 int	write_xml_meta(FILE *file, char *error)
   {
-   picstruct		*field;
+   xmlstruct		*x;
    struct tm		*tm;
    char			*pspath,*psuser, *pshost, *str;
    double		temp;
-   int			i,d,n, nmed, ntot;
+   int			i,d,n;
 
 /* Processing date and time if msg error present */
- /*  if (error)
+  if (error)
     {
     thetime2 = time(NULL);
     tm = localtime(&thetime2);
@@ -190,7 +197,7 @@ int	write_xml_meta(FILE *file, char *error)
     sprintf(prefs.stime_end,"%02d:%02d:%02d",
         tm->tm_hour, tm->tm_min, tm->tm_sec);
     prefs.time_diff = difftime(thetime2, thetime);
-    } */
+    }
 
 /* Username */
   psuser = pspath = pshost = NULL;
@@ -242,7 +249,7 @@ int	write_xml_meta(FILE *file, char *error)
         " ucd=\"meta.dataset\" value=\"%s\"/>\n",
         pspath);
 
-/*
+
   if (error)
     {
     fprintf(file, "\n  <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -258,9 +265,9 @@ int	write_xml_meta(FILE *file, char *error)
     fprintf(file, "  <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
         "!!!!!!!!!!!!!!!!!!!! -->\n\n");
     }
-*/
+
 /* Meta-data for the ww processing */
-/*
+
   fprintf(file, "  <TABLE ID=\"OutFields\" name=\"OutFields\">\n");
   fprintf(file, "   <DESCRIPTION>Metadata about the output images gathered by "
         "%s</DESCRIPTION>\n", BANNER);
@@ -268,82 +275,30 @@ int	write_xml_meta(FILE *file, char *error)
         " if an error occurred early in the processing -->\n");
 
   fprintf(file, "   <PARAM name=\"NExtensions\" datatype=\"int\""
-        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", next);
-  fprintf(file, "   <!-- CurrExtension may differ from Nextensions"
-        " if an error occurred -->\n");
-  fprintf(file, "   <PARAM name=\"CurrExtension\" datatype=\"int\""
-        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", ext);
-*/
-/*
+        " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", nxml);
+
+  fprintf(file, "   <FIELD name=\"Output_Image_Name\" datatype=\"char\""
+        " ucd=\" \"/>\n");
+  fprintf(file, "   <FIELD name=\"Output_Image_Type\" datatype=\"char\""
+        " ucd=\" \"/>\n");
+  fprintf(file, "   <FIELD name=\"Extension\" datatype=\"int\""
+        " ucd=\" \"\n");
+  fprintf(file, "   <FIELD name=\"Effective_Area\" datatype=\"double\""
+        " ucd=\" \"/>\n");
+
   fprintf(file, "   <DATA><TABLEDATA>\n");
   for (n=0; n<nxml; n++)
     {
-    field = ww_xml[n];
+    x = &ww_xml[n];
     fprintf(file, "    <TR>\n"
-        "     <TD>%d</TD><TD>%d</TD><TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
-        "     <TD>%d",
-        psf->samples_loaded,
-        psf->samples_accepted,
-        psf->fwhm,
-        psf->pixstep,
-        psf->chi2,
-        psf->poly->ndim? prefs.context_nsnap : 1);
-    ntot =  1;
-    nmed = 0;
-    for (d=0; d<psf_xml[0]->poly->ndim; d++)
-      {
-      fprintf(file, " %d", prefs.context_nsnap);
-      ntot *= prefs.context_nsnap;
-      nmed += nmed*prefs.context_nsnap + (prefs.context_nsnap-1)/2;
-      }
-    fwhm_best = elongation_best = beta_worse = residuals_best = BIG;
-    fwhm_worse = elongation_worse = beta_best = residuals_worse = -BIG;
-    for (i=0; i<ntot; i++)
-      {
-      if ((temp=sqrt(psf->moffat[i].fwhm_min*psf->moffat[i].fwhm_max))
-        < fwhm_best)
-        fwhm_best = temp;
-      if (temp > fwhm_worse)
-        fwhm_worse = temp;
-      if ((temp=psf->moffat[i].fwhm_max / psf->moffat[i].fwhm_min)
-        < elongation_best)
-        elongation_best = temp;
-      if (temp > elongation_worse)
-        elongation_worse = temp;
-      if (psf->moffat[i].beta > beta_best)
-        beta_best = psf->moffat[i].beta;
-      if (psf->moffat[i].beta < beta_worse)
-        beta_worse = psf->moffat[i].beta;
-      if (psf->moffat[i].residuals < residuals_best)
-        residuals_best = psf->moffat[i].residuals;
-      if (psf->moffat[i].residuals > residuals_worse)
-        residuals_worse = psf->moffat[i].residuals;
-      }
-
-    fprintf(file, "</TD>\n"
-        "     <TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
-        "     <TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
-        "     <TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
-        "     <TD>%.6g</TD><TD>%.6g</TD><TD>%.6g</TD>\n"
-        "    </TR>\n",
-        sqrt(psf->moffat[nmed].fwhm_min*psf->moffat[nmed].fwhm_max),
-        fwhm_best,
-        fwhm_worse,
-        psf->moffat[nmed].fwhm_max/psf->moffat[nmed].fwhm_min,
-        elongation_best,
-        elongation_worse,
-        psf->moffat[nmed].beta,
-        beta_best,
-        beta_worse,
-        psf->moffat[nmed].residuals,
-        residuals_best,
-        residuals_worse);
-
+        "     <TD>%s</TD><TD>%s</TD><TD>%d</TD><TD>%.6g</TD>\n",
+        x->fieldname,
+        x->fieldtype,
+        x->ext,
+        prefs.getarea? x->effarea : 9999.);
     }
   fprintf(file, "   </TABLEDATA></DATA>\n");
-
   fprintf(file, "  </TABLE>\n");
-*/
 
 /* Warnings */
   fprintf(file, "  <TABLE ID=\"Warnings\" name=\"Warnings\">\n");
@@ -365,7 +320,7 @@ int	write_xml_meta(FILE *file, char *error)
   fprintf(file, "  </TABLE>\n");
 
 /* Configuration file */
-/*
+
   fprintf(file, "  <RESOURCE ID=\"Config\" name=\"Config\">\n");
   fprintf(file, "   <DESCRIPTION>%s configuration</DESCRIPTION>\n", BANNER);
   fprintf(file,
@@ -380,63 +335,66 @@ int	write_xml_meta(FILE *file, char *error)
         " ucd=\"obs.param;meta.file\" value=\"%s\"/>\n",
         prefs.prefs_name);
 
-/*
+
   if (!error)
     {
-/*-- PSF model */
-/*
-    write_xmlconfigparam(file, "PSF_Name", "",
-                "meta.id;meta.file","%s");
-    write_xmlconfigparam(file, "PSF_Accuracy", "",
-                "obs.param;phot.flux.sb;arith.ratio","%.6g");
-    write_xmlconfigparam(file, "PSF_NSuper", "pix",
-                "meta.number;instr.pixel","%d");
-    write_xmlconfigparam(file, "PSF_Sampling", "pix",
-                "arith.factor;instr.pixel","%.6g");
-    write_xmlconfigparam(file, "PSF_Size", "pix",
-                "meta.number;instr.pixel","%d");
-    write_xmlconfigparam(file, "PSF_Recenter", "",
-                "meta.code","%c");
+/*-- Input Weight Maps */
 
-/*-- Sample selection */
-/*
-    write_xmlconfigparam(file, "PSF_AutoSelect", "",
-                "meta.code","%c");
-    write_xmlconfigparam(file, "PSF_FWHMRange", "pix",
-                "phys.size.diameter;instr.det.psf","%.6g");
-    write_xmlconfigparam(file, "PSF_Variability", "",
-                "instr.det.psf;arith.ratio","%.6g");
-    write_xmlconfigparam(file, "PSF_MinSN", "",
-                "stat.snr;stat.min","%.6g");
-    write_xmlconfigparam(file, "PSF_MaxElong", "",
-                "src.ellipticity;stat.max","%.6g");
-    write_xmlconfigparam(file, "BadPixel_Filter", "",
-                "meta.code","%c");
-    write_xmlconfigparam(file, "BadPixel_NMax", "",
-                "meta.number;instr.pixel;stat.max","%d");
+    write_xmlconfigparam(file, "Weight_Names", "",
+                "meta.id;meta.fits;obs.image","%s");
+    write_xmlconfigparam(file, "Weight_Min", "counts",
+                "meta;obs.param","%3.1f");
+    write_xmlconfigparam(file, "Weight_Max", "counts",
+                "meta;obs.param","%3.1f");
+    write_xmlconfigparam(file, "Weight_OutFlags", "",
+                "meta.code.class","%d");
 
-/*-- PSF dependencies */
-/*
-    write_xmlconfigparam(file, "Context_Keys", "",
-                "meta.id;src", "%s");
-    write_xmlconfigparam(file, "Context_Groups", "",
-                "meta.id;stat.fit.param", "%d");
-    write_xmlconfigparam(file, "Context_Degrees", "",
-                "meta.id;stat.fit.param", "%d");
-    write_xmlconfigparam(file, "CheckImage_Type", "",
-                "meta.code", "%s");
-    write_xmlconfigparam(file, "CheckImage_Name", "",
-                "meta.id;meta.file;meta.fits", "%s");
+/*-- Input Flag Maps */
+
+    write_xmlconfigparam(file, "Flag_Names", "",
+                "meta.id;meta.fits;obs.image","%s");
+    write_xmlconfigparam(file, "Flag_Wmasks", "",
+                "meta;obs.param","%d");
+    write_xmlconfigparam(file, "Flag_Masks", "",
+                "meta;obs.param","%d");
+    write_xmlconfigparam(file, "Flag_Outflags", "",
+                "meta.code.class","%d");
+
+/*-- Input Polygons Files */
+
+    write_xmlconfigparam(file, "Poly_Names", "",
+                "meta.id;meta.file", "%s");
+    write_xmlconfigparam(file, "Poly_Outflags", "",
+                "meta.code.class", "%d");
+    write_xmlconfigparam(file, "Poly_Outweights", "",
+                "meta.code.class", "%d");
+    write_xmlconfigparam(file, "Poly_Intersect", "",
+                "meta;meta.code", "%s");
+
+/*-- Outputs */
+
+    write_xmlconfigparam(file, "Outweight_Name", "",
+                "meta.id;meta.fits","%s");
+    write_xmlconfigparam(file, "Outflag_Name", "",
+                "meta.id;meta.fits","%s");
+
 
 /*-- Miscellaneous */
-/*
+
+    write_xmlconfigparam(file, "Getarea", "meta.code", " ","%s");
+    write_xmlconfigparam(file, "Getarea_Weight", "meta;obs.param", " ","%3.1f");
+    write_xmlconfigparam(file, "Getarea_Flags", "meta;obs.param",
+                " ", "%d");
+    write_xmlconfigparam(file, "Memory_Bufsize", "meta.cryptic", " ","%d");
     write_xmlconfigparam(file, "Verbose_Type", "", "meta.code","%s");
     write_xmlconfigparam(file, "Write_XML", "", "meta.code","%s");
     write_xmlconfigparam(file, "NThreads", "",
                 "meta.number;meta.software", "%d");
+
     }
+
   fprintf(file, "  </RESOURCE>\n");
-*/
+
   fprintf(file, " </RESOURCE>\n");
 
   return RETURN_OK;
@@ -639,11 +597,9 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
                 " arraysize=\"*\" ucd=\"%s\" value=\"\"/>\n",
                 name, ucd);
       break;
-/*
     default:
         error(EXIT_FAILURE, "*Internal Error*: Type Unknown",
                 " in write_xmlconfigparam()");
-*/
     }
 
   return RETURN_OK;
