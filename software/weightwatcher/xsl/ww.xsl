@@ -181,27 +181,32 @@
 
 <!-- ********************* XSL template for OutFields ******************** -->
   <xsl:template name="outfields">
-   <xsl:variable name="imname" select="count(FIELD[@name='Image_Name']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="imname" select="count(FIELD[@name='Output_Image_Name']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="imtype" select="count(FIELD[@name='Output_Image_Type']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="ext" select="count(FIELD[@name='Extension']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="effarea" select="count(FIELD[@name='Effective_Area']/preceding-sibling::FIELD)+1"/>
    <p>
     <TABLE class="sortable" id="wwout" BORDER="2">
      <TR>
       <TH BGCOLOR="#FFEECC">Output Image Name</TH>
+      <TH BGCOLOR="#FFEECC">Output Image Type</TH>
       <TH BGCOLOR="#FFEECC">Extension</TH>
       <TH BGCOLOR="#FFEECC">Effective Area</TH>
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="left" BGCOLOR="#EEEEEE">
          <el><xsl:value-of select="TD[$imname]"/></el>
+        </td>
+        <td align="center" BGCOLOR="#EEEEEE">
+         <el><xsl:value-of select="TD[$imtype]"/></el>
         </td>
         <td align="center" BGCOLOR="#EEEEEE">
          <el><xsl:value-of select="TD[$ext]"/></el>
         </td>
         <td align="right" BGCOLOR="#EEEEEE">
-         <el><xsl:value-of select="format-number(TD[$effarea], '#0.000')"/></el>
+         <el><xsl:value-of select="format-number(TD[$effarea],'##0.0000')"/></el>
         </td>
        </tr>
       </xsl:for-each>

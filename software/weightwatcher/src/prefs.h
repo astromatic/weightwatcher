@@ -29,7 +29,7 @@ typedef struct
   {
   char		**command_line;			        /* Command line */
   int		ncommand_line;			        /* nb of params */
-  char		prefs_name[MAXCHAR];			/* prefs filename*/
+  char		prefs_name[MAXCHAR];   			        /* prefs filename*/
   char		*(weight_name[MAXNIMAGE]);		/* WEIGHT filenames */
   int		nweight_name;				/* number of params */
   char		*(flag_name[MAXNIMAGE]);		/* WEIGHT filenames */
@@ -66,8 +66,8 @@ typedef struct
   int		nthreads;			/* Number of active threads */
 /* Misc */
   int		xml_flag;			/* Write XML file? */
-  char		xml_name[MAXCHAR];		/* XML file name */
-  char		xsl_name[MAXCHAR];		/* XSL file name (or URL) */
+  char		xml_name[MAXCHAR];        		/* XML file name */
+  char		xsl_name[MAXCHAR];       		/* XSL file name (or URL) */
   char		sdate_start[12];		/* ww start date */
   char		stime_start[12];		/* ww start time */
   char		sdate_end[12];			/* ww end date */

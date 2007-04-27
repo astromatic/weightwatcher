@@ -37,7 +37,6 @@ extern pkeystruct	key[];			/* from preflist.h */
 extern char		keylist[][32];		/* from preflist.h */
  
 xmlstruct		*ww_xml = NULL;
-int			*nfield_xml;
 int			nxml, nxmlmax;
 
 
@@ -48,15 +47,14 @@ PURPOSE	Initialize a set of meta-data kept in memory before being written to the
 INPUT	Number of extensions.
 OUTPUT	-.
 NOTES	-.
-AUTHOR	E. Bertin (IAP)
-VERSION	02/03/2007
+AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
+VERSION	27/04/2007
  ***/
-int	init_xml(int next)
+int	init_xml(int nxml)
   {
-  QMALLOC(ww_xml, xmlstruct, next);
-  QMALLOC(nfield_xml, int, next);
+  QCALLOC(ww_xml, xmlstruct, nxml);
+  nxmlmax = nxml;
   nxml = 0;
-  nxmlmax = next;
 
   return EXIT_SUCCESS;
   }
@@ -87,24 +85,24 @@ INPUT	Pointer to the current field,
         number of fields loaded.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	Global preferences are used.
-AUTHOR	E. Bertin (IAP)
-VERSION	02/03/2007
+AUTHOR	C. Marmo (IAP) E. Bertin (IAP) 
+VERSION	27/04/2007
  ***/
 int	update_xml(picstruct *field, int next, char *str)
   {
 
-    xmlstruct *x;
+    xmlstruct *x = NULL;
 
   if (nxml < nxmlmax)
-    x = &ww_xml[nxml++];
-  else
-    x = &ww_xml[0];	/* Extra calls update the meta-data of output frame */
+    x = &ww_xml[nxml];
 
   strcpy(x->fieldname,field->filename);
   strcpy(x->fieldtype, str);
-  x->ext = next;
+  x->ext = next+1;
   if (prefs.getarea)
     x->effarea = field->effarea;
+
+  nxml++;
 
   return EXIT_SUCCESS;
   }
@@ -116,10 +114,10 @@ PURPOSE	Save meta-data to an XML file/stream.
 INPUT	XML file name.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
-AUTHOR	E. Bertin (IAP)
-VERSION	06/10/2006
+AUTHOR	C. Marmo (IAP) E. Bertin (IAP)
+VERSION	27/04/2007
  ***/
-int	write_xml(char *filename)
+int	write_xml()
   {
    FILE		*file;
 
@@ -176,16 +174,15 @@ INPUT	Pointer to the output file (or stream),
         Pointer to an error msg (or NULL).
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
-AUTHOR	E. Bertin (IAP)
-VERSION	28/03/2007
+AUTHOR	C. Marmo (IAP) E. Bertin (IAP)
+VERSION	27/04/2007
  ***/
 int	write_xml_meta(FILE *file, char *error)
   {
    xmlstruct		*x;
    struct tm		*tm;
    char			*pspath,*psuser, *pshost, *str;
-   double		temp;
-   int			i,d,n;
+   int			n;
 
 /* Processing date and time if msg error present */
   if (error)
@@ -278,13 +275,13 @@ int	write_xml_meta(FILE *file, char *error)
         " ucd=\"meta.number;meta.dataset\" value=\"%d\"/>\n", nxml);
 
   fprintf(file, "   <FIELD name=\"Output_Image_Name\" datatype=\"char\""
-        " ucd=\" \"/>\n");
+        " ucd=\"meta.id;meta.file;meta.fits\"/>\n");
   fprintf(file, "   <FIELD name=\"Output_Image_Type\" datatype=\"char\""
-        " ucd=\" \"/>\n");
+        " ucd=\"meta;meta.code.class\"/>\n");
   fprintf(file, "   <FIELD name=\"Extension\" datatype=\"int\""
-        " ucd=\" \"\n");
-  fprintf(file, "   <FIELD name=\"Effective_Area\" datatype=\"double\""
-        " ucd=\" \"/>\n");
+        " ucd=\"meta.number;meta.dataset\"/>\n");
+  fprintf(file, "   <FIELD name=\"Effective_Area\" datatype=\"float\""
+        " ucd=\"phys.size;arith.ratio\"/>\n");
 
   fprintf(file, "   <DATA><TABLEDATA>\n");
   for (n=0; n<nxml; n++)
@@ -296,6 +293,7 @@ int	write_xml_meta(FILE *file, char *error)
         x->fieldtype,
         x->ext,
         prefs.getarea? x->effarea : 9999.);
+    fprintf(file, "    </TR>\n");
     }
   fprintf(file, "   </TABLEDATA></DATA>\n");
   fprintf(file, "  </TABLE>\n");
@@ -381,11 +379,11 @@ int	write_xml_meta(FILE *file, char *error)
 
 /*-- Miscellaneous */
 
-    write_xmlconfigparam(file, "Getarea", "meta.code", " ","%s");
-    write_xmlconfigparam(file, "Getarea_Weight", "meta;obs.param", " ","%3.1f");
-    write_xmlconfigparam(file, "Getarea_Flags", "meta;obs.param",
-                " ", "%d");
-    write_xmlconfigparam(file, "Memory_Bufsize", "meta.cryptic", " ","%d");
+    write_xmlconfigparam(file, "Getarea", "", "meta.code","%s");
+    write_xmlconfigparam(file, "Getarea_Weight", "", "meta;obs.param","%3.1f");
+    write_xmlconfigparam(file, "Getarea_Flags", "",
+                "meta;obs.param", "%d");
+    write_xmlconfigparam(file, "Memory_Bufsize", "", "meta.cryptic","%d");
     write_xmlconfigparam(file, "Verbose_Type", "", "meta.code","%s");
     write_xmlconfigparam(file, "Write_XML", "", "meta.code","%s");
     write_xmlconfigparam(file, "NThreads", "",

@@ -39,7 +39,7 @@ typedef struct
 
 extern int	init_xml(int next),
                 update_xml(picstruct *field, int next, char *str),
-                write_xml(char *filename),
+                write_xml(),
                 write_xml_header(FILE *file),
                 write_xml_meta(FILE *file, char *error),
                 write_xmlconfigparam(FILE *file, char *name, char *unit,

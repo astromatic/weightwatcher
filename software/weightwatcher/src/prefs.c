@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP)
+*	Author:		E.BERTIN (IAP) C. MARMO (IAP)
 *
 *	Contents:	Functions to handle the configuration file.
 *
-*	Last modify:	12/01/2005
+*	Last modify:	12/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */

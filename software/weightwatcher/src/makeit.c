@@ -47,7 +47,7 @@ void	makeit(void)
    FLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, flagmask, fmask,wmask,fval, maxbit;
-   int		i,j, t, width, height, padsize, ext, next, ntab;
+   int		i,j, t, width, height, padsize, ext, next, ntab, nxml;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
@@ -104,7 +104,7 @@ void	makeit(void)
   if (!(cat = read_cat(filename)))
     error(EXIT_FAILURE, "*Error*: cannot open ", filename);
   tab = cat->tab;
-  next = 0;
+  next = nxml = 0;
   for (ntab = 0 ; ntab<cat->ntab; ntab++, tab = tab->nexttab)
     {
 /*--  Check for the next valid image extension */
@@ -116,8 +116,10 @@ void	makeit(void)
     }
 
   if (prefs.xml_flag)
-    init_xml(next);
-
+    {
+    nxml = (prefs.oweight_name != NULL && prefs.oflag_name != NULL)? 2*next : next ; 
+    init_xml(nxml);
+    }
 /* Open vector images */
   if (prefs.nvec_name)
     QMALLOC(vec, vecstruct *, prefs.nvec_name)
@@ -416,7 +418,7 @@ void	makeit(void)
         QFWRITE(owfield->fitshead,owfield->fitsheadsize,
                owfield->file, owfield->rfilename);
         fseek(owfield->file,arposw,SEEK_SET);
-        offield->effarea = farea0;
+        owfield->effarea = farea0;
         }
       if (offield)
         {
@@ -482,7 +484,7 @@ void	makeit(void)
   if (prefs.xml_flag)
     {
     NFPRINTF(OUTPUT, "Writing XML file...");
-    write_xml(prefs.xml_name);
+    write_xml();
     end_xml();
     }
 
