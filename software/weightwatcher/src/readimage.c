@@ -400,7 +400,7 @@ void	readimagehead(picstruct *field)
 				:(def))
 
 #define	FITSTOS(k, str, def) \
-			{ if (point = fitsnfind(buf, k, n)) \
+			{ if ((point = fitsnfind(buf, k, n))) \
 				{ \
 				for (i=0,point+=11; (*point)!='\'';) \
 					str[i++] = *(point++); \

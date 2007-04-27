@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP)
+*	Author:		E.BERTIN (IAP) C. MARMO (IAP)
 *
 *	Contents:	Parsing of the command line.
 *
-*	Last modify:	11/12/2004
+*	Last modify:	27/04/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -33,8 +33,7 @@
 
 #define		SYNTAX \
 EXECUTABLE " [-c <configuration_file>] [-<keyword> <value>]\n"\
-" or, to dump a default configuration file:\n" \
-EXECUTABLE " -d \n" \
+"> to dump a default configuration file: " EXECUTABLE " -d \n" \
 "> to dump a default extended configuration file: " EXECUTABLE " -dd \n"
 
 extern const char	notokstr[];

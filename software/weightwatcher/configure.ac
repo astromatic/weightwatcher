@@ -150,12 +150,12 @@ if test $use_icc = "yes" -a $CC = "icc"; then
 fi
 
 # Special options for the Insure++ debugger
-if test $use_insure = "yes"; then
-  CC="insure"
-  CFLAGS="-g"
-else
-LDFLAGS="$LDFLAGS -static"
-fi
+#if test $use_insure = "yes"; then
+#  CC="insure"
+#  CFLAGS="-g"
+#else
+#LDFLAGS="$LDFLAGS -static"
+#fi
 
 # Special options for the Assure debugger
 rootsrcdir=`pwd`

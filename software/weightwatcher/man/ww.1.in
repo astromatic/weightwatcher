@@ -24,9 +24,10 @@ print version number, then exit
 \fB\-d\fR, \fB\-\-dump\fR
 dump a default configuration file
 .SH AUTHOR
-Written by Emmanuel Bertin (Institut d'Astrophysique de Paris and Observatoire de Paris).
+Written by Emmanuel Bertin (Institut d'Astrophysique de Paris and Observatoire de Paris)
+and Chiara Marmo (Institut d'Astrophysique de Paris).
 .PP
-Copyright 2000-2005 Emmanuel Bertin
+Copyright 2000-2008 Emmanuel Bertin Chiara Marmo
 .RE
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
