@@ -53,7 +53,7 @@ vecstruct	*newvec(char *filename, catstruct *cat)
 
    tab = NULL;
    wcs = NULL;
-   fk5 = 0;
+   fk5 = ext = 0;
 
 /* First allocate memory for the new vector (and nullify pointers) */
   QCALLOC(vector, vecstruct, 1);

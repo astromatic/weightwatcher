@@ -47,11 +47,11 @@ void	makeit(void)
    FLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, flagmask, fmask,wmask,fval, maxbit;
-   int		i,j, t, width, height, padsize, ext, next, ntab, nxml;
+   int		i,j, t, padsize, ext, next, ntab, nxml;
    char		*charpix, *ofstrip, *filename;
    short	*shortpix;
    int		*contextbuf;
-   unsigned long area, area0, arposw, arposf, headposw, headposf;
+   unsigned long area, area0, arposw, arposf, headposw, headposf, width, height;
    float        wwlim;
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
@@ -404,7 +404,7 @@ void	makeit(void)
     if (prefs.getarea)
       {
       FPRINTF(OUTPUT, "\n \n");
-      FPRINTF(OUTPUT, "> Total number of pixels = %d\n",width*height);
+      FPRINTF(OUTPUT, "> Total number of pixels = %ld\n",width*height);
       if (owfield)
         {
         farea0 = (double)(area0)/(double)(width*height);
