@@ -292,7 +292,7 @@ int	write_xml_meta(FILE *file, char *error)
         x->fieldname,
         x->fieldtype,
         x->ext,
-        prefs.getarea? x->effarea : 9999.);
+        prefs.getarea? x->effarea : 9999);
     fprintf(file, "    </TR>\n");
     }
   fprintf(file, "   </TABLEDATA></DATA>\n");
@@ -341,9 +341,9 @@ int	write_xml_meta(FILE *file, char *error)
     write_xmlconfigparam(file, "Weight_Names", "",
                 "meta.id;meta.fits;obs.image","%s");
     write_xmlconfigparam(file, "Weight_Min", "counts",
-                "meta;obs.param","%3.1f");
+                "meta;obs.param","%3.1e");
     write_xmlconfigparam(file, "Weight_Max", "counts",
-                "meta;obs.param","%3.1f");
+                "meta;obs.param","%3.1e");
     write_xmlconfigparam(file, "Weight_OutFlags", "",
                 "meta.code.class","%d");
 

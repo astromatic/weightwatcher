@@ -43,7 +43,7 @@ typedef struct
 /* ---- main image parameters */
   int		bitpix, bytepix;	/* nb of bits and bytes per pixel */
   int		bitsgn;			/* non-zero if signed integer data */
-  int		width, height;		/* x,y size of the field */
+  unsigned long	width, height;		/* x,y size of the field */
   KINGSIZE_T	npix;			/* total number of pixels */
   double	bscale, bzero;		/* FITS scale and offset */
   void		*strip;			/* pointer to the image buffer */

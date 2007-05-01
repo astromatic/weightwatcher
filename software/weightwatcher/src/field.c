@@ -190,7 +190,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     else if (cat->ntab>99)
       sprintf(gstr, "[%3d/%d]", nok2, cat->ntab-1);
     if (prefs.verbose_type != QUIET)
-      fprintf(OUTPUT, "Frame:    \"%.20s\" %s / %d x %d / %d bits %s data\n",
+      fprintf(OUTPUT, "Frame:    \"%.20s\" %s / %ld x %ld / %d bits %s data\n",
 	field->ident,
         cat->ntab>1? gstr : "",
 	field->width, field->height, field->bytepix*8,

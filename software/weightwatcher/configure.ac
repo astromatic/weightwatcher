@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.7.7, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.8.0, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_CONFIG_HEADER(config.h)
@@ -27,6 +27,7 @@ AC_MSG_RESULT([*********** Configuring:  $PACKAGE $VERSION ($date) **********])
 
 # Initialize the list of compilers to consider
 cclist="cc gcc"
+use_static="no"
 
 # Backup and reset the input CFLAGS and LDFLAGS
 mycflags="$CFLAGS"
@@ -126,7 +127,7 @@ AC_CHECK_LIB(m, sin)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h unistd.h sys/mman.h)
+AC_CHECK_HEADERS(stdlib.h string.h fcntl.h unistd.h sys/mman.h)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -141,6 +142,10 @@ AC_FUNC_MMAP
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([atexit memmove memset munmap strchr strpbrk strrchr strcspn strtol])
 
+# Check support for large files
+AC_SYS_LARGEFILE
+AC_FUNC_FSEEKO
+
 AC_DEFINE(_FILE_OFFSET_BITS, 64, [off_t size])
 AC_DEFINE(_LARGEFILE64_SOURCE, 1, [enable 64bit file pointers])
 
@@ -149,13 +154,15 @@ if test $use_icc = "yes" -a $CC = "icc"; then
   CFLAGS="$CFLAGS -O3 -axiMKW -ipo -ipo_obj -unroll"
 fi
 
-# Special options for the Insure++ debugger
-#if test $use_insure = "yes"; then
-#  CC="insure"
-#  CFLAGS="-g"
-#else
-#LDFLAGS="$LDFLAGS -static"
-#fi
+# Special options for the Insure debugger
+if test $use_insure = "yes" -a $CC = "insure"; then
+  CFLAGS="$CFLAGS -g"
+  use_static="no"
+fi
+# Special optimization options for the INTEL C compiler
+if test $use_icc = "yes" -a $CC = "icc"; then
+  CFLAGS="$CFLAGS -O3 -axiMKW -ipo -ipo_obj -unroll"
+fi
 
 # Special options for the Assure debugger
 rootsrcdir=`pwd`
@@ -167,6 +174,10 @@ fi
 # Link with e-fence option
 if test "$use_efence" = "yes"; then
   LIBS="-lefence $LIBS"
+fi
+
+if test "$use_static" = "yes"; then
+  LDFLAGS="$LDFLAGS -static"
 fi
 
 # Override automatic CFLAGS and LDFLAGS with those of user

@@ -59,6 +59,6 @@ vecstruct	*newvec(char *filename, catstruct *cat);
 
 void		endvec(vecstruct *vector),
 		vec_to_map(vecstruct *vector, picstruct *wfield,
-			picstruct *ffield, int bufpos,
+			picstruct *ffield, unsigned long bufpos,
 			int bufsize, int *contextbuf, int ext);
 

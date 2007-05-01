@@ -214,17 +214,18 @@ Update a field image buffer, according to vector information found in the
 vector polygon.
 */
 void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
-		int bufpos, int bufsize, int *contextbuf, int ext)
+		unsigned long bufpos, int bufsize, int *contextbuf, int ext)
 
   {
-   segstruct	*seg, *segpoly;
-   crosstruct	*crosslist;
-   FLAGTYPE	*flagbuf, ofmask;
-   PIXTYPE	*pixbuf,
-		weight;
-   float	y;
-   int		*plist, *cbt,
-		c, i, p,x, w, yh, nsegpoly,nsegpoly2, ncross, pcount;
+   segstruct	 *seg, *segpoly;
+   crosstruct	 *crosslist;
+   FLAGTYPE	 *flagbuf, ofmask;
+   PIXTYPE	 *pixbuf,
+		 weight;
+   float	 y;
+   unsigned long yh, w;
+   int		 *plist, *cbt,
+		 c, i, p,x, nsegpoly,nsegpoly2, ncross, pcount;
 
 /* Check that an output map is requested */
   if (!wfield && !ffield)
