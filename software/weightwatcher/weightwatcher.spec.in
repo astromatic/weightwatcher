@@ -41,6 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/bin/ww
 /usr/local/man/man1/ww.1
 /usr/local/man/manx/ww.x
+/usr/local/share/@PACKAGE_NAME@
 %doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS
 
 %changelog
