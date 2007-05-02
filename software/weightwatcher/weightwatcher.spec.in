@@ -22,11 +22,11 @@ used in astronomical image-processing packages like Swarp or SExtractor.
 %setup -q
 
 %build
-if test "$GCCFLAGS"; then
-./configure --enable-static --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/ww/ww.xsl
-make CFLAGS="$GCCFLAGS"
+if test "$TPXFLAGS"; then
+./configure --enable-static --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/@PACKAGE_NAME@/ww.xsl 
+make CC="$TPXCC" CFLAGS="$TPXFLAGS"
 else
-./configure --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/ww/ww.xsl
+./configure --prefix=$RPM_BUILD_ROOT/usr/local/ --mandir=$RPM_BUILD_ROOT/usr/local/man/ --with-xsl_url=file:///usr/local/share/@PACKAGE_NAME@/ww.xsl
 make
 fi
 
@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/bin/ww
 /usr/local/man/man1/ww.1
 /usr/local/man/manx/ww.x
-%doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS doc/ww.pdf
+%doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS
 
 %changelog
 * @DATE2@ @PACKAGER@ <@PACKAGE_BUGREPORT@>
