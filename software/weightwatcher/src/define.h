@@ -9,7 +9,7 @@
 *
 *	Contents:	global definitions.
 *
-*	Last modify:	12/12/2002
+*	Last modify:	03/05/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -30,7 +30,7 @@
 #else
 #define		MYVERSION	VERSION
 #endif
-#define         COPYRIGHT       "Emmanuel BERTIN <bertin@iap.fr>"
+#define         COPYRIGHT       "Emmanuel BERTIN <bertin@iap.fr> & Chiara MARMO <marmo@iap.fr>"
 #define		WEBSITE		"http://terapix.iap.fr/soft/ww"
 #define         INSTITUTE       "TERAPIX team at IAP  http://terapix.iap.fr"
 
@@ -43,7 +43,7 @@
 /*----------------------------- Internal constants --------------------------*/
 
 #define		BIG		1e+30		/* a huge number */
-#define		OUTPUT		stderr		/* where all msgs are sent */
+#define		OUTPUT		stdout		/* where all msgs are sent */
 #define		MAXCHAR		512		/* max. number of characters */
 #define		MAXNIMAGE	32		/* max. # of imput images */
 

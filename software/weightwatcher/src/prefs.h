@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	25/04/2007
+*	Last modify:	03/05/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -19,11 +19,9 @@
 
 /*----------------------------- Internal constants --------------------------*/
 
-#define	MAXLIST		32		/* max. nb of list members */
+#define		MAXCHARL	16384	/* max. nb of chars in a string list */
+#define		MAXLIST		256	/* max. nb of list members */
 
-/* NOTES:
-One must have:	MAXLIST >= 1 (preferably >= 16!)
-*/
 /*------------------------------- preferences -------------------------------*/
 typedef struct
   {
@@ -82,6 +80,7 @@ typedef struct
 extern int	cistrcmp(char *cs, char *ct, int mode);
 
 extern void	dumpprefs(int state),
+		endprefs(void),
 		readprefs(char *filename,char **argkey,char **argval,int narg),
 		useprefs(void);
 

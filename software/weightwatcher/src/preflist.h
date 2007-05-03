@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	25/04/2007
+*	Last modify:	03/05/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -71,7 +71,7 @@ pkeystruct key[] =
   {""}
  };
  
-char			keylist[sizeof(key)/sizeof(pkeystruct)][16];
+char			keylist[sizeof(key)/sizeof(pkeystruct)][32];
 static const char	notokstr[] = {" \t=,;\n\r\""};
 
 char *default_prefs[] =
@@ -98,10 +98,10 @@ char *default_prefs[] =
 " ",
 "#---------------------------------- Polygons ----------------------------------",
 " ",
-"POLY_NAMES      \"\"              # Filename(s) of input DS9/SAOimage regions",
+"POLY_NAMES      \"\"              # Filename(s) of input DS9 regions",
 "POLY_OUTFLAGS                   # FLAG values for polygon masks",
 "POLY_OUTWEIGHTS 0.0             # Weight values for polygon masks",
-"POLY_INTERSECT   Y              # Do you want to flag polygon intersections?",
+"POLY_INTERSECT  Y               # Use inclusive OR for polygon intersects (Y/N)?",
 " ",
 "#---------------------------------- Output ------------------------------------",
 " ",
@@ -110,14 +110,14 @@ char *default_prefs[] =
 " ",
 "#----------------------------- Miscellaneous ---------------------------------",
 " ",
-"GETAREA         N               # Compute effective area on flag and weight image",
-"GETAREA_WEIGHT  0.0             # Weight inferior limit accounted in the area", 
-"GETAREA_FLAGS   1               # Bits which will be accounted in the area", 
+"GETAREA         N               # Compute area for flags and weights (Y/N)?",
+"GETAREA_WEIGHT  0.0             # Weight threshold for area computation", 
+"GETAREA_FLAGS   1               # Bit mask for flag pixels not counted in area", 
 "MEMORY_BUFSIZE  256             # Buffer size in lines",
-"VERBOSE_TYPE    NORMAL          # can be \"QUIET\", \"NORMAL\" or \"FULL\"",
+"VERBOSE_TYPE    NORMAL          # can be QUIET, NORMAL or FULL",
 "WRITE_XML       Y               # Write XML file (Y/N)?",
 "XML_NAME        ww.xml          # Filename for XML output",
-"*XSL_URL        " XSL_URL,
+"*XSL_URL         " XSL_URL,
 "*                                # Filename for XSL style-sheet",
 #ifdef USE_THREADS
 "NTHREADS        0               # Number of simultaneous threads for",

@@ -24,6 +24,14 @@
 #include	<stdlib.h>
 #include	<string.h>
 
+#include	<unistd.h>
+#if defined(USE_THREADS) \
+&& (defined(__APPLE__) || defined(FREEBSD) || defined(NETBSD))	/* BSD, Apple */
+ #include	<sys/types.h>
+ #include	<sys/sysctl.h>
+#elif defined(USE_THREADS) && defined(HAVE_MPCTL)		/* HP/UX */
+ #include	<sys/mpctl.h>
+#endif
 #include	"define.h"
 #include	"globals.h"
 #include	"fits/fitscat.h"
@@ -57,12 +65,12 @@ documentation)
 void    readprefs(char *filename, char **argkey, char **argval, int narg)
 
   {
-   FILE          *infile;
-   char          *cp, str[MAXCHAR], *keyword, *value, **dp;
-   int           i, ival, nkey, warn, argi, flagc, flagd, flage, flagz;
-   float         dval;
+   FILE		*infile;
+   char		*cp, str[MAXCHARL], *keyword, *value, **dp;
+   int		i, ival, nkey, warn, argi, flagc, flagd, flage, flagz;
+   float	dval;
 #ifndef	NO_ENVVAR
-   static char	value2[MAXCHAR],envname[MAXCHAR];
+   char		value2[MAXCHARL],envname[MAXCHAR];
    char		*dolpos;
 #endif
 
@@ -103,7 +111,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
         flagd = 0;
       }
     if (!flagc && !flagd)
-      if (flage || !fgets(str, MAXCHAR, infile))
+      if (flage || !fgets(str, MAXCHARL, infile))
         flagc=1;
 
     if (flagc)
@@ -179,7 +187,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
           case P_INT:
             if (!value || value[0]==(char)'#')
               error(EXIT_FAILURE, keyword," keyword has no value!");
-            ival = atoi(value);
+            ival = (int)strtol(value, (char **)NULL, 0);
             if (ival>=key[nkey].imin && ival<=key[nkey].imax)
               *(int *)(key[nkey].ptr) = ival;
             else
@@ -232,7 +240,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
               {
               if (i>=key[nkey].nlistmax)
                 error(EXIT_FAILURE, keyword, " has too many members");
-              ival = strtol(value, NULL, 0);
+              ival = strtol(value, (char **)NULL, 0);
               if (ival>=key[nkey].imin && ival<=key[nkey].imax)
                 ((int *)key[nkey].ptr)[i] = ival;
               else
@@ -330,7 +338,7 @@ void    readprefs(char *filename, char **argkey, char **argval, int narg)
 /*
 find an item within a list of keywords.
 */
-int	findkeys(char *str, char keyw[][16], int mode)
+int	findkeys(char *str, char keyw[][32], int mode)
 
   {
   int i;
@@ -378,18 +386,56 @@ void	useprefs(void)
   {
    unsigned short	ashort=1;
    int			i;
+#ifdef USE_THREADS
+   int			nproc;
+#endif
 
 
 /* Test if byteswapping will be needed */
   bswapflag = *((char *)&ashort);
 
 /* Multithreading */
-#ifndef USE_THREADS
-  if (prefs.nthreads > 1)
+#ifdef USE_THREADS
+  if (!prefs.nthreads)
+    {
+/*-- Get the number of processors for parallel builds */
+/*-- See, e.g. http://ndevilla.free.fr/threads */
+    nproc = -1;
+#if defined(_SC_NPROCESSORS_ONLN)		/* AIX, Solaris, Linux */
+    nproc = (int)sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined(_SC_NPROCESSORS_CONF)
+    nproc = (int)sysconf(_SC_NPROCESSORS_CONF);
+#elif defined(__APPLE__) || defined(FREEBSD) || defined(NETBSD)	/* BSD, Apple */
+    {
+     int	mib[2];
+     size_t	len;
+
+     mib[0] = CTL_HW;
+     mib[1] = HW_NCPU;
+     len = sizeof(nproc);
+     sysctl(mib, 2, &nproc, &len, NULL, 0);
+     }
+#elif defined (_SC_NPROC_ONLN)			/* SGI IRIX */
+    nproc = sysconf(_SC_NPROC_ONLN);
+#elif defined(HAVE_MPCTL)			/* HP/UX */
+    nproc =  mpctl(MPC_GETNUMSPUS_SYS, 0, 0);
+#endif
+
+    if (nproc>0)
+      prefs.nthreads = nproc;
+    else
+      {
+      prefs.nthreads = 2;
+      warning("Cannot find the number of CPUs on this system:",
+		"NTHREADS defaulted to 2");
+      }
+    }
+#else
+  if (prefs.nthreads != 1)
     {
     prefs.nthreads = 1;
-    warning("NTHREADS > 1 ignored: ",
-		"this build of " BANNER " is single-threaded");
+    warning("NTHREADS != 1 ignored: ",
+	"this build of " BANNER " is single-threaded");
     }
 #endif
 
@@ -420,3 +466,25 @@ void	useprefs(void)
   return;
   }
 
+
+/********************************* endprefs *********************************/
+/*
+Mostly free memory allocate for static arrays.
+*/
+void	endprefs(void)
+
+  {
+    int	i;
+
+  for (i=0; i<prefs.nweight_name; i++)
+    free(prefs.weight_name[i]);
+  for (i=0; i<prefs.nflag_name; i++)
+    free(prefs.flag_name[i]);
+  for (i=0; i<prefs.nvec_name; i++)
+    free(prefs.vec_name[i]);
+  free(prefs.oweight_name);
+  free(prefs.oflag_name);
+
+
+  return;
+  }
