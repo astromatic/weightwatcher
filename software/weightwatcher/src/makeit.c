@@ -403,12 +403,12 @@ void	makeit(void)
 /* Adding information on effective area */
     if (prefs.getarea)
       {
-      FPRINTF(OUTPUT, "\n \n");
-      FPRINTF(OUTPUT, "> Total number of pixels = %ld\n",width*height);
+      NPRINTF(OUTPUT, "\n \n");
+      NPRINTF(OUTPUT, "> Total number of pixels = %ld\n",width*height);
       if (owfield)
         {
         farea0 = (double)(area0)/(double)(width*height);
-        FPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %e\n",prefs.weightlim,farea0);
+        NPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %6.4e\n",prefs.weightlim,farea0);
         arposw=ftell(owfield->file);
         headposw=arposw-(owfield->npix*owfield->bytepix)
              -owfield->fitsheadsize;
@@ -423,12 +423,12 @@ void	makeit(void)
       if (offield)
         {
         farea = 1. - (double)(area)/(double)(width*height);
-        FPRINTF(OUTPUT, "> Pixels flagged as ");
+        NPRINTF(OUTPUT, "> Pixels flagged as ");
         for (t=0;t<prefs.ngeta_flags-1;t++)
-	  FPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
-        FPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
-        FPRINTF(OUTPUT, "= %ld\n",area);
-        FPRINTF(OUTPUT, "> Fraction of pixels not flagged= %e\n",farea);
+	  NPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
+        NPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
+        NPRINTF(OUTPUT, "= %ld\n",area);
+        NPRINTF(OUTPUT, "> Fraction of pixels not flagged= %6.4e\n",farea);
         arposf=ftell(offield->file);
         headposf=arposf-(offield->npix*offield->bytepix)
              -offield->fitsheadsize;
@@ -441,7 +441,7 @@ void	makeit(void)
         fseek(offield->file,arposf,SEEK_SET);
         offield->effarea = farea;
         }
-      FPRINTF(OUTPUT, "\n");
+      NPRINTF(OUTPUT, "\n");
       }
     NFPRINTF(OUTPUT, "Closing files...");
     QCALLOC(charpix, char, FBSIZE);
