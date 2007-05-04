@@ -112,9 +112,10 @@ int	main(int argc, char *argv[])
 
   makeit();
 
+  endprefs();
+
   NFPRINTF(OUTPUT, "");
   NPRINTF(OUTPUT, "> All done (in %.0f s)\n", prefs.time_diff);
-
 
   exit(EXIT_SUCCESS);
   }

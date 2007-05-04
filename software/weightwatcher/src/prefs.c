@@ -485,6 +485,5 @@ void	endprefs(void)
   free(prefs.oweight_name);
   free(prefs.oflag_name);
 
-
   return;
   }

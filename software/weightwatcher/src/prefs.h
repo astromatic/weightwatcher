@@ -27,7 +27,7 @@ typedef struct
   {
   char		**command_line;			        /* Command line */
   int		ncommand_line;			        /* nb of params */
-  char		prefs_name[MAXCHAR];   			        /* prefs filename*/
+  char		prefs_name[MAXCHAR];   			/* prefs filename*/
   char		*(weight_name[MAXNIMAGE]);		/* WEIGHT filenames */
   int		nweight_name;				/* number of params */
   char		*(flag_name[MAXNIMAGE]);		/* WEIGHT filenames */
