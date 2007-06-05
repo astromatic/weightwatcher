@@ -9,7 +9,7 @@
 *
 *	Contents:	XML logging.
 *
-*	Last modify:	26/04/2007
+*	Last modify:	05/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -544,7 +544,7 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
                 name, ucd);
       break;
     case P_STRING:
-      sprintf(value, (char *)key[i].ptr);
+      sprintf(value, "%s", (char *)key[i].ptr);
       fprintf(file, "   <PARAM name=\"%s\" datatype=\"char\" arraysize=\"*\""
         " ucd=\"%s\" value=\"%s\"/>\n",
         name, ucd, value);
@@ -559,7 +559,7 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
                 name, ucd, value);
         for (j=1; j<n; j++)
           {
-          sprintf(value, ((char **)key[i].ptr)[j]);
+          sprintf(value, "%s", ((char **)key[i].ptr)[j]);
           fprintf(file, ",%s", value);
           }
         fprintf(file, "\"/>\n");
