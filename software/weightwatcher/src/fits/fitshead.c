@@ -479,10 +479,8 @@ int	prim_head(tabstruct *tab)
 	"/ This is a FITS file                            ", 80);
 /* fitsverify 4.13 (CFITSIO V3.002) return an error
    if PCOUNT and GCOUNT are in a primary header (23/05/2007)*/
-      if (fitsfind(tab->headbuf, "PCOUNT"))
-        removekeywordfrom_head(tab, "PCOUNT");      
-      if (fitsfind(tab->headbuf, "GCOUNT"))
-        removekeywordfrom_head(tab, "GCOUNT");      
+      removekeywordfrom_head(tab, "PCOUNT");      
+      removekeywordfrom_head(tab, "GCOUNT");      
       return RETURN_ERROR;
       }
 
@@ -498,7 +496,7 @@ OUTPUT	RETURN_OK if tab header was already extension, or RETURN_ERROR
 	otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	08/05/2002
+VERSION	12/06/2007
  ***/
 int	ext_head(tabstruct *tab)
 
@@ -509,6 +507,12 @@ int	ext_head(tabstruct *tab)
       {
       strncpy(tab->headbuf, "XTENSION= 'IMAGE   '           "
 		"/ Image extension                                ", 80);
+/* fitsverify 4.13 (CFITSIO V3.002) return an error
+   if PCOUNT and GCOUNT are not in the extension header (23/05/2007) */
+      addkeywordto_head(tab, "PCOUNT  ", "required keyword; must = 0");      
+      addkeywordto_head(tab, "GCOUNT  ", "required keyword; must = 1");
+      fitswrite(tab->headbuf,"PCOUNT  ", &tab->pcount, H_INT, T_LONG);     
+      fitswrite(tab->headbuf,"GCOUNT  ", &tab->gcount, H_INT, T_LONG);
       return RETURN_ERROR;
       }
 

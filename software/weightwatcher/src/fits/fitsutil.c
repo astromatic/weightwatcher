@@ -76,6 +76,24 @@ int	fitsadd(char *fitsbuf, char *keyword, char *comment)
       else
         return RETURN_ERROR;
       }
+/*-- Special case of PCOUNT/GCOUNT parameters */
+    if (!strncmp(keyword, "PCOUNT", 6))
+      {
+      headpos=fitsfind(fitsbuf, "NAXIS   ");
+      if (headpos>0)
+        headpos+=4;
+      else
+        return RETURN_ERROR;
+      }
+    if (!strncmp(keyword, "GCOUNT", 6))
+      {
+      headpos=fitsfind(fitsbuf, "NAXIS   ");
+      if (headpos>0)
+        headpos+=5;
+      else
+        return RETURN_ERROR;
+      }
+
     key_ptr = fitsbuf+80*headpos;
     memmove(key_ptr+80, key_ptr, 80*(headpos2-headpos+1));
 
@@ -88,7 +106,6 @@ int	fitsadd(char *fitsbuf, char *keyword, char *comment)
     else
       sprintf(str, "%-8.8s=                        %-47.47s",
 	      keyword, " ");
-
     memcpy(key_ptr, str, 80);
     }
 
