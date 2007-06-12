@@ -31,7 +31,7 @@
 #define		MYVERSION	VERSION
 #endif
 #define         COPYRIGHT       "Emmanuel BERTIN <bertin@iap.fr> & Chiara MARMO <marmo@iap.fr>"
-#define		WEBSITE		"http://terapix.iap.fr/soft/ww"
+#define		WEBSITE		"http://terapix.iap.fr/soft/weightwatcher"
 #define         INSTITUTE       "TERAPIX team at IAP  http://terapix.iap.fr"
 
 /*----------------------------- Physical constants --------------------------*/
