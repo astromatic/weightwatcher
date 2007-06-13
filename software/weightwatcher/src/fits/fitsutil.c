@@ -9,7 +9,7 @@
 *
 *	Contents:	functions for handling FITS keywords.
 *
-*	Last modify:	21/09/2006
+*	Last modify:	12/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -38,8 +38,8 @@ NOTES	For all keywords except commentary ones (like COMMENT, HISTORY or
 	blank), it is checked that they do not exist already.
 	Enough memory should be provided for the FITS header to contain one
 	more line of 80 char.
-AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	13/06/2004
+AUTHOR	E. Bertin (IAP & Leiden observatory) C. Marmo (IAP)
+VERSION	13/06/2007
  ***/
 int	fitsadd(char *fitsbuf, char *keyword, char *comment)
 
@@ -80,16 +80,18 @@ int	fitsadd(char *fitsbuf, char *keyword, char *comment)
     if (!strncmp(keyword, "PCOUNT", 6))
       {
       headpos=fitsfind(fitsbuf, "NAXIS   ");
+      sscanf(fitsbuf+80*headpos, "NAXIS   =                    %d", &n);
       if (headpos>0)
-        headpos+=4;
+        headpos+=(n+1);
       else
         return RETURN_ERROR;
       }
     if (!strncmp(keyword, "GCOUNT", 6))
       {
       headpos=fitsfind(fitsbuf, "NAXIS   ");
+      sscanf(fitsbuf+80*headpos, "NAXIS   =                    %d", &n);
       if (headpos>0)
-        headpos+=5;
+        headpos+=(n+2);
       else
         return RETURN_ERROR;
       }

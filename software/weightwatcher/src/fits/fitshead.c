@@ -9,7 +9,7 @@
 *
 *	Contents:	general functions for handling FITS file headers.
 *
-*	Last modify:	11/06/2007
+*	Last modify:	12/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
