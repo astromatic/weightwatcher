@@ -45,8 +45,11 @@ DIST_COMMON = README $(am__configure_deps) $(dist_pkgdata_DATA) \
 	autoconf/missing autoconf/mkinstalldirs
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acx_prog_cc_optim.m4 \
-	$(top_srcdir)/acx_prog_cc_optim.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/acx_urbi_resolve_dir.m4 \
+	$(top_srcdir)/acx_prog_cc_optim.m4 \
+	$(top_srcdir)/acx_prog_cc_optim.m4 \
+	$(top_srcdir)/acx_urbi_resolve_dir.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -196,7 +199,7 @@ EXTRA_DIST = doc AUTHORS BUGS ChangeLog COPYING \
 			  HISTORY INSTALL README THANKS \
 				acx_prog_cc_optim.m4 
 
-RPM_ROOTDIR = /usr/src/RPM
+RPM_ROOTDIR = `rpmbuild --nobuild -E %_topdir`
 RPM_SRCDIR = $(RPM_ROOTDIR)/SOURCES
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -644,6 +647,7 @@ uninstall-info: uninstall-info-recursive
 	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am \
 	uninstall-dist_pkgdataDATA uninstall-info-am
+
 
 rpm:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)

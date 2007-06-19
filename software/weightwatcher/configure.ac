@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.8.1, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.8.2, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_CONFIG_HEADER(config.h)
@@ -21,6 +21,7 @@ AC_SUBST(DATE3, "$date3")
 
 # Include macros
 sinclude(acx_prog_cc_optim.m4)
+sinclude(acx_urbi_resolve_dir.m4)
 
 # Display pakage and version number
 AC_MSG_RESULT([*********** Configuring:  $PACKAGE $VERSION ($date) **********])
@@ -94,23 +95,7 @@ AC_DEFINE(_FILE_OFFSET_BITS, 64, [off_t size])
 AC_DEFINE(_LARGEFILE64_SOURCE, 1, [enable 64bit file pointers])
 
 # Set the data directory to a true absolute path
-if test "x${datadir}" = 'x${prefix}/share'; then
-  if test "x${prefix}" = "xNONE"; then
-    datadir2="${ac_default_prefix}/share"
-  else
-    datadir2="${prefix}/share"
-  fi
-elif test "x${datadir}" = 'x${datarootdir}'; then
-  if test "x${datarootdir}" = 'x${prefix}/share'; then
-    if test "x${prefix}" = "xNONE"; then
-      datadir2="${ac_default_prefix}/share"
-    else
-      datadir2="${prefix}/share"
-    fi
-  fi
-else
-  datadir2="${datadir}"
-fi
+datadir2=$(URBI_RESOLVE_DIR([$datadir]))
 
 # Provide a special option for the default XSLT URL
 AC_ARG_WITH(xsl_url,

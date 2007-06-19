@@ -4,3 +4,6 @@ Mario Nonino <ts.astro.it>
 Christophe Benoist <benoist@obs-nice.fr>
 Thomas Erben <terben@astro.uni-bonn.de>
 	Help in discovering bugs or bringing suggestions
+Akim Demaille <akim@lrde.epita.fr>
+        for solving the $datarootdir issue and providing the URBI_RESOLVE_DIR()
+        function.
