@@ -9,7 +9,7 @@
 *
 *	Contents:	general functions for handling FITS file headers.
 *
-*	Last modify:	12/06/2007
+*	Last modify:	20/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -495,8 +495,8 @@ INPUT	Table structure.
 OUTPUT	RETURN_OK if tab header was already extension, or RETURN_ERROR
 	otherwise.
 NOTES	-.
-AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	12/06/2007
+AUTHOR	E. Bertin (IAP & Leiden observatory) C. Marmo (IAP)
+VERSION	20/06/2007
  ***/
 int	ext_head(tabstruct *tab)
 
@@ -507,6 +507,9 @@ int	ext_head(tabstruct *tab)
       {
       strncpy(tab->headbuf, "XTENSION= 'IMAGE   '           "
 		"/ Image extension                                ", 80);
+/* fitsverify 4.13 (CFITSIO V3.002) return an error
+   if EXTEND are in an extension header (20/06/2007)*/
+      removekeywordfrom_head(tab, "EXTEND");      
 /* fitsverify 4.13 (CFITSIO V3.002) return an error
    if PCOUNT and GCOUNT are not in the extension header (23/05/2007) */
       addkeywordto_head(tab, "PCOUNT  ", "required keyword; must = 0");      
