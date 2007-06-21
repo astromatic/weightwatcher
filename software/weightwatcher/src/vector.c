@@ -9,7 +9,7 @@
 *
 *	Contents:	Handling of vector structures.
 *
-*	Last modify:	24/04/2007
+*	Last modify:	21/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -84,9 +84,6 @@ vecstruct	*newvec(char *filename, catstruct *cat)
 /* Make almost sure from first line that we are accessing the right data */
     if (!nline)
       {
-      if (*str != (char)'#')
-        error(EXIT_FAILURE, vector->filename, " is NOT a"
-		" DS9/SAOimage vector-file");
       if (*str)
         str[strlen(str)-1] = (char)'\0';
       strncpy(vector->ident, str+2, MAXCHAR);
