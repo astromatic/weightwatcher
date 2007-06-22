@@ -5,11 +5,11 @@
 *
 *	Part of:	WeightWatcher
 *
-*	Author:		E.BERTIN (IAP)
+*	Author:		E.BERTIN (IAP) C. Marmo (IAP)
 *
 *	Contents:	Handling of field structures.
 *
-*	Last modify:	13/04/2004
+*	Last modify:	22/06/2007
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -43,9 +43,10 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
    double	dval;
    OFF_T	mefpos;
    char		*buf;
-   int		ival, nok2, ntab;
+   int		ival, nok2, ntab, n;
 
 /* First allocate memory for the new field (and nullify pointers) */
+  n = 2; /* Avoid gcc -Wall warnings */
   mefpos = 0; /* Avoid gcc -Wall warnings */
   QCALLOC(field, picstruct, 1);
   if (mfield)
@@ -86,14 +87,28 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         free(buf);
         }
       }
-
     else
       {
       if (!(field->file = fopen(field->filename, "rb+")))
         error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
       fseek(field->file, 0L, SEEK_END);
       }
-    if (fitsfind(field->fitshead, "END     ")+7 >= field->fitsheadsize/80)
+/* Looking for copyright Keywords */
+    if (!(fitsfind(field->fitshead, "SOFTNAME")))
+      n++;
+    if (!(fitsfind(field->fitshead, "SOFTVERS")))
+      n++;
+    if (!(fitsfind(field->fitshead, "SOFTDATE")))
+      n++;
+    if (!(fitsfind(field->fitshead, "SOFTAUTH")))
+      n++;
+    if (!(fitsfind(field->fitshead, "SOFTINST")))
+      n++;
+
+    if (prefs.getarea)
+      n+=2;
+
+    if (fitsfind(field->fitshead, "END     ")+n >= field->fitsheadsize/80)
       {
       QCALLOC(field->fitshead, char, field->fitsheadsize+FBSIZE);
       memcpy(field->fitshead, mfield->fitshead, field->fitsheadsize);
@@ -151,6 +166,8 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;
+
+   printf("%d\n",field->fitsheadsize);
     QFWRITE(field->fitshead,field->fitsheadsize,field->file,field->filename);
     }
   else
@@ -213,7 +230,6 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
 
   return field;
   }
-
 
 /********************************* endfield **********************************/
 /*
