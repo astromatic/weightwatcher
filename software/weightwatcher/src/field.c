@@ -166,8 +166,6 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;
-
-   printf("%d\n",field->fitsheadsize);
     QFWRITE(field->fitshead,field->fitsheadsize,field->file,field->filename);
     }
   else
