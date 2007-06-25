@@ -112,7 +112,7 @@ vecstruct	*newvec(char *filename, catstruct *cat)
     if (str2 && strstr(str, "fk5"))
       {
       fk5 = 1;
-      warning(vector->filename, " is a WCS DS9/SAOimage vector-file: "
+      warning(vector->filename, " is a WCS vector-file: "
                 "number of extensions forced to 1!!");
       ext = 0;
       for (tab=cat->tab; tab->naxis<2; tab=tab->nexttab);
