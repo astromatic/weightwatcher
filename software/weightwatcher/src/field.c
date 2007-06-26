@@ -94,15 +94,15 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       fseek(field->file, 0L, SEEK_END);
       }
 /* Looking for copyright Keywords */
-    if (!(fitsfind(field->fitshead, "SOFTNAME")))
+    if ((fitsfind(field->fitshead, "SOFTNAME")==RETURN_ERROR))
       n++;
-    if (!(fitsfind(field->fitshead, "SOFTVERS")))
+    if ((fitsfind(field->fitshead, "SOFTVERS")==RETURN_ERROR))
       n++;
-    if (!(fitsfind(field->fitshead, "SOFTDATE")))
+    if ((fitsfind(field->fitshead, "SOFTDATE")==RETURN_ERROR))
       n++;
-    if (!(fitsfind(field->fitshead, "SOFTAUTH")))
+    if ((fitsfind(field->fitshead, "SOFTAUTH")==RETURN_ERROR))
       n++;
-    if (!(fitsfind(field->fitshead, "SOFTINST")))
+    if ((fitsfind(field->fitshead, "SOFTINST")==RETURN_ERROR))
       n++;
 
     if (prefs.getarea)
