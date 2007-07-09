@@ -46,7 +46,6 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
    int		ival, nok2, ntab, n;
 
 /* First allocate memory for the new field (and nullify pointers) */
-  n = 2; /* Avoid gcc -Wall warnings */
   mefpos = 0; /* Avoid gcc -Wall warnings */
   QCALLOC(field, picstruct, 1);
   if (mfield)
@@ -93,6 +92,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
       fseek(field->file, 0L, SEEK_END);
       }
+    n = 1; /* Avoid gcc -Wall warnings */
 /* Looking for copyright Keywords */
     if ((fitsfind(field->fitshead, "SOFTNAME")==RETURN_ERROR))
       n++;
