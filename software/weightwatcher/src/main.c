@@ -22,14 +22,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "define.h"
 #include "globals.h"
 #include "fits/fitscat.h"
 #include "prefs.h"
-#ifdef HAVE_PLPLOT
-#include "plplot/plplot.h"
-#endif
+#include "xml.h"
 
 #define		SYNTAX \
 EXECUTABLE " [-c <configuration_file>] [-<keyword> <value>]\n"\
@@ -37,6 +36,7 @@ EXECUTABLE " [-c <configuration_file>] [-<keyword> <value>]\n"\
 "> to dump a default extended configuration file: " EXECUTABLE " -dd \n"
 
 extern const char	notokstr[];
+time_t		thetime, thetime2;
 
 /********************************** main ************************************/
 int	main(int argc, char *argv[])
@@ -44,6 +44,7 @@ int	main(int argc, char *argv[])
   {
    char		**argkey, **argval;
    int		a, narg, opt, opt2;
+   struct tm		*tm;
 
   if (argc<2)
     {
@@ -55,6 +56,17 @@ int	main(int argc, char *argv[])
 
   QMALLOC(argkey, char *, argc);
   QMALLOC(argval, char *, argc);
+
+/* Install error logging */
+  error_installfunc(write_error);
+
+/* Processing start date and time */
+  thetime = time(NULL);
+  tm = localtime(&thetime);
+  sprintf(prefs.sdate_start,"%04d-%02d-%02d",
+        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+  sprintf(prefs.stime_start,"%02d:%02d:%02d",
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 /* Default parameters */
   prefs.command_line = argv;
@@ -111,6 +123,24 @@ int	main(int argc, char *argv[])
   free(argval);
 
   makeit();
+
+/* Processing end date and time */
+  thetime2 = time(NULL);
+  tm = localtime(&thetime2);
+  sprintf(prefs.sdate_end,"%04d-%02d-%02d",
+        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+  sprintf(prefs.stime_end,"%02d:%02d:%02d",
+        tm->tm_hour, tm->tm_min, tm->tm_sec);
+  prefs.time_diff = difftime(thetime2, thetime);
+
+/* Write XML */
+
+  if (prefs.xml_flag)
+    {
+    NFPRINTF(OUTPUT, "Writing XML file...");
+    write_xml();
+    end_xml();
+    }
 
   endprefs();
 

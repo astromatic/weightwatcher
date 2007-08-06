@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>
 
 #include "define.h"
 #include "globals.h"
@@ -32,8 +31,6 @@
 #include "vector.h"
 #include "readimage.h"
 #include "xml.h"
-
-time_t		thetime, thetime2;
 
 /********************************** makeit ***********************************/
 void	makeit(void)
@@ -56,7 +53,6 @@ void	makeit(void)
    double       farea, farea0;
    size_t	spoonful, stripsize, cumspoon;
    KINGSIZE_T	bowl, npix;
-   struct tm		*tm;
 
 /* Install the signal-catching routines for temporary file cleanup */
 #ifdef USE_THREADS
@@ -64,17 +60,6 @@ void	makeit(void)
 #else
   install_cleanup(NULL);
 #endif
-
-/* Install error logging */
-  error_installfunc(write_error);
-
-/* Processing start date and time */
-  thetime = time(NULL);
-  tm = localtime(&thetime);
-  sprintf(prefs.sdate_start,"%04d-%02d-%02d",
-        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-  sprintf(prefs.stime_start,"%02d:%02d:%02d",
-        tm->tm_hour, tm->tm_min, tm->tm_sec);
 
   NFPRINTF(OUTPUT, "");
   QPRINTF(OUTPUT,
@@ -469,25 +454,6 @@ void	makeit(void)
       }
     free(charpix);
     }
-
-/* Processing end date and time */
-  thetime2 = time(NULL);
-  tm = localtime(&thetime2);
-  sprintf(prefs.sdate_end,"%04d-%02d-%02d",
-        tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-  sprintf(prefs.stime_end,"%02d:%02d:%02d",
-        tm->tm_hour, tm->tm_min, tm->tm_sec);
-  prefs.time_diff = difftime(thetime2, thetime);
-
-/* Write XML */
-
-  if (prefs.xml_flag)
-    {
-    NFPRINTF(OUTPUT, "Writing XML file...");
-    write_xml();
-    end_xml();
-    }
-
 
 /* Free and close everything */
   for (i=0; i<prefs.nvec_name; i++)

@@ -243,90 +243,12 @@
       <TH BGCOLOR="#FFEECC">Config Parameter</TH>
       <TH BGCOLOR="#FFEECC">Value</TH>
      </TR>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>WEIGHT_NAMES</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Weight_Names']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>WEIGHT_MIN</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Weight_Min']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>WEIGHT_MAX</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Weight_Max']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>WEIGHT_OUTFLAGS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Weight_OutFlags']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>FLAG_NAMES</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Flag_Names']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>FLAG_WMASKS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Flag_Wmasks']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>FLAG_MASKS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Flag_Masks']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>FLAG_OUTFLAGS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Flag_Outflags']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>POLY_NAMES</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Poly_Names']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>POLY_OUTFLAGS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Poly_Outflags']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>POLY_OUTWEIGHTS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Poly_Outweights']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>POLY_INTERSECT</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Poly_Intersect']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>OUTWEIGHT_NAME</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Outweight_Name']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>OUTFLAG_NAME</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Outflag_Name']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>GETAREA</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Getarea']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>GETAREA_WEIGHT</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Getarea_Weight']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>GETAREA_FLAGS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Getarea_Flags']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>MEMORY_BUFSIZE</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Memory_Bufsize']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>VERBOSE_TYPE</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Verbose_Type']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>WRITE_XML</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='Write_XML']/@value"/></el></td>
-     </tr>
-     <tr BGCOLOR="#EEEEEE">
-      <td><el>NTHREADS</el></td>
-      <td><el><xsl:value-of select="PARAM[@name='NThreads']/@value"/></el></td>
-     </tr>
+     <xsl:for-each select="PARAM[position()>2]">
+      <tr BGCOLOR="#EEEEEE">
+       <td><el><xsl:value-of select="@name"/></el></td>
+       <td><el><xsl:value-of select="@value"/></el></td>
+      </tr>
+     </xsl:for-each>
     </TABLE>
    </p>
    <p>
