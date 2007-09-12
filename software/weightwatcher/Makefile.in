@@ -42,7 +42,7 @@ DIST_COMMON = README $(am__configure_deps) $(dist_pkgdata_DATA) \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL \
 	THANKS TODO autoconf/config.guess autoconf/config.sub \
 	autoconf/depcomp autoconf/install-sh autoconf/ltmain.sh \
-	autoconf/missing autoconf/mkinstalldirs
+	autoconf/missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acx_urbi_resolve_dir.m4 \
@@ -54,7 +54,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
-mkinstalldirs = $(SHELL) $(top_srcdir)/autoconf/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = weightwatcher.spec
 depcomp =

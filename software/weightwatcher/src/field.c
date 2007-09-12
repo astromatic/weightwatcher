@@ -42,8 +42,8 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
    picstruct	*field;
    double	dval;
    OFF_T	mefpos;
-   char		*buf;
-   int		ival, nok2, ntab, n;
+   char		*buf,*charpix;
+   int		i, ival, nok2, ntab, n;
 
 /* First allocate memory for the new field (and nullify pointers) */
   mefpos = 0; /* Avoid gcc -Wall warnings */
@@ -68,7 +68,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         {
 /*------ Create a small primary header */
         QCALLOC(buf, char, FBSIZE);
-        strcpy(buf, "END     ");
+        strcpy(buf, "END                            ");
         fitsadd(buf, "SIMPLE  ",  "Standard FITS");
         ival = 1;
         fitswrite(buf, "SIMPLE  ", &ival, H_BOOL, T_LONG);
@@ -82,15 +82,17 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
         fitswrite(buf, "EXTEND  ", &next, H_BOOL, T_LONG);
         fitsadd(buf, "NEXTEND ",  "Number of extensions");
         fitswrite(buf, "NEXTEND ", &next, H_INT, T_LONG);
+        for (charpix = buf, i=0; i<FBSIZE; i++, charpix++)
+          if (!*charpix)
+            *charpix = ' ';
         QFWRITE(buf, FBSIZE, field->file, field->filename);
         free(buf);
         }
       }
     else
       {
-      if (!(field->file = fopen(field->filename, "rb+")))
+      if (!(field->file = fopen(field->filename, "ab")))
         error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
-      fseek(field->file, 0L, SEEK_END);
       }
     n = 1; /* Avoid gcc -Wall warnings */
 /* Looking for copyright Keywords */
@@ -166,6 +168,9 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;
+    for (charpix = field->fitshead, i=0; i<field->fitsheadsize; i++, charpix++)
+      if (!*charpix)
+        *charpix = ' ';
     QFWRITE(field->fitshead,field->fitsheadsize,field->file,field->filename);
     }
   else

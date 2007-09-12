@@ -46,8 +46,8 @@ EXIT_FAILURE=1
 
 PROGRAM=ltmain.sh
 PACKAGE=libtool
-VERSION=1.5.20
-TIMESTAMP=" (1.1220.2.287 2005/08/31 18:54:15)"
+VERSION=1.5.18
+TIMESTAMP=" (1.1220.2.246 2005/05/16 10:00:18)"
 
 # See if we are running on zsh, and set the options which allow our
 # commands through without removal of \ escapes.
@@ -91,15 +91,14 @@ rm="rm -f"
 Xsed="${SED}"' -e 1s/^X//'
 sed_quote_subst='s/\([\\`\\"$\\\\]\)/\\\1/g'
 # test EBCDIC or ASCII
-case `echo X|tr X '\101'` in
- A) # ASCII based system
-    # \n is not interpreted correctly by Solaris 8 /usr/ucb/tr
-  SP2NL='tr \040 \012'
-  NL2SP='tr \015\012 \040\040'
+case `echo A|tr A '\301'` in
+ A) # EBCDIC based system
+  SP2NL="tr '\100' '\n'"
+  NL2SP="tr '\r\n' '\100\100'"
   ;;
- *) # EBCDIC based system
-  SP2NL='tr \100 \n'
-  NL2SP='tr \r\n \100\100'
+ *) # Assume ASCII based system
+  SP2NL="tr '\040' '\012'"
+  NL2SP="tr '\015\012' '\040\040'"
   ;;
 esac
 
@@ -137,6 +136,7 @@ show_help=
 execute_dlfiles=
 lo2o="s/\\.lo\$/.${objext}/"
 o2lo="s/\\.${objext}\$/.lo/"
+quote_scanset='[[~#^*{};<>?'"'"' 	]'
 
 #####################################
 # Shell function definitions:
@@ -195,7 +195,7 @@ func_infer_tag ()
       CC_quoted=
       for arg in $CC; do
 	case $arg in
-	  *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	  *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	  arg="\"$arg\""
 	  ;;
 	esac
@@ -216,7 +216,7 @@ func_infer_tag ()
 	    for arg in $CC; do
 	    # Double-quote args containing other shell metacharacters.
 	    case $arg in
-	      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	      arg="\"$arg\""
 	      ;;
 	    esac
@@ -340,7 +340,7 @@ func_extract_archives ()
  	    func_extract_an_archive "$my_xdir" "$my_xabs"
 	  fi # $darwin_arches
 	fi # $run
-	;;
+      ;;
       *)
         func_extract_an_archive "$my_xdir" "$my_xabs"
         ;;
@@ -589,7 +589,7 @@ if test -z "$show_help"; then
 
     for arg
     do
-      case $arg_mode in
+      case "$arg_mode" in
       arg  )
 	# do not "continue".  Instead, add this to base_compile
 	lastarg="$arg"
@@ -640,7 +640,7 @@ if test -z "$show_help"; then
 	    # Many Bourne shells cannot handle close brackets correctly
 	    # in scan sets, so we specify it separately.
 	    case $arg in
-	      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	      arg="\"$arg\""
 	      ;;
 	    esac
@@ -675,7 +675,7 @@ if test -z "$show_help"; then
       # in scan sets (worked around with variable expansion),
       # and furthermore cannot handle '|' '&' '(' ')' in scan sets 
       # at all, so we specify them separately.
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	lastarg="\"$lastarg\""
 	;;
       esac
@@ -750,12 +750,13 @@ if test -z "$show_help"; then
 
     qlibobj=`$echo "X$libobj" | $Xsed -e "$sed_quote_subst"`
     case $qlibobj in
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	qlibobj="\"$qlibobj\"" ;;
     esac
-    test "X$libobj" != "X$qlibobj" \
-	&& $echo "X$libobj" | grep '[]~#^*{};<>?"'"'"' 	&()|`$[]' \
-	&& $echo "$modename: libobj name \`$libobj' may not contain shell special characters."
+    if test "X$libobj" != "X$qlibobj"; then
+	$echo "$modename: libobj name \`$libobj' may not contain shell special characters."
+	exit $EXIT_FAILURE
+    fi
     objname=`$echo "X$obj" | $Xsed -e 's%^.*/%%'`
     xdir=`$echo "X$obj" | $Xsed -e 's%/[^/]*$%%'`
     if test "X$xdir" = "X$obj"; then
@@ -836,7 +837,7 @@ compiler."
     fi
     qsrcfile=`$echo "X$srcfile" | $Xsed -e "$sed_quote_subst"`
     case $qsrcfile in
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
       qsrcfile="\"$qsrcfile\"" ;;
     esac
 
@@ -1123,7 +1124,7 @@ EOF
       arg="$1"
       shift
       case $arg in
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	qarg=\"`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`\" ### testsuite: skip nested quoting test
 	;;
       *) qarg=$arg ;;
@@ -1432,7 +1433,7 @@ EOF
 	continue
 	;;
 
-      -framework|-arch)
+      -framework)
         prev=darwin_framework
         compiler_flags="$compiler_flags $arg"
 	compile_command="$compile_command $arg"
@@ -1555,7 +1556,7 @@ EOF
 	# to be aesthetically quoted because they are evaled later.
 	arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
 	case $arg in
-	*[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	*$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	  arg="\"$arg\""
 	  ;;
 	esac
@@ -1671,7 +1672,7 @@ EOF
 	for flag in $args; do
 	  IFS="$save_ifs"
 	  case $flag in
-	    *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	    *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	    flag="\"$flag\""
 	    ;;
 	  esac
@@ -1689,7 +1690,7 @@ EOF
 	for flag in $args; do
 	  IFS="$save_ifs"
 	  case $flag in
-	    *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	    *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	    flag="\"$flag\""
 	    ;;
 	  esac
@@ -1722,7 +1723,7 @@ EOF
 	# to be aesthetically quoted because they are evaled later.
 	arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
 	case $arg in
-	*[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	*$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	  arg="\"$arg\""
 	  ;;
 	esac
@@ -1856,7 +1857,7 @@ EOF
 	# to be aesthetically quoted because they are evaled later.
 	arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
 	case $arg in
-	*[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+	*$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	  arg="\"$arg\""
 	  ;;
 	esac
@@ -2421,7 +2422,7 @@ EOF
 	      case "$temp_rpath " in
 	      *" $dir "*) ;;
 	      *" $absdir "*) ;;
-	      *) temp_rpath="$temp_rpath $absdir" ;;
+	      *) temp_rpath="$temp_rpath $dir" ;;
 	      esac
 	    fi
 
@@ -2607,7 +2608,7 @@ EOF
 		add_dir="-L$dir"
 		# Try looking first in the location we're being installed to.
 		if test -n "$inst_prefix_dir"; then
-		  case $libdir in
+		  case "$libdir" in
 		    [\\/]*)
 		      add_dir="$add_dir -L$inst_prefix_dir$libdir"
 		      ;;
@@ -2680,7 +2681,7 @@ EOF
 	      add_dir="-L$libdir"
 	      # Try looking first in the location we're being installed to.
 	      if test -n "$inst_prefix_dir"; then
-		case $libdir in
+		case "$libdir" in
 		  [\\/]*)
 		    add_dir="$add_dir -L$inst_prefix_dir$libdir"
 		    ;;
@@ -2741,6 +2742,8 @@ EOF
 	      fi
 	    fi
 	  else
+	    convenience="$convenience $dir/$old_library"
+	    old_convenience="$old_convenience $dir/$old_library"
 	    deplibs="$dir/$old_library $deplibs"
 	    link_static=yes
 	  fi
@@ -3430,7 +3433,7 @@ EOF
 	  if test "$?" -eq 0 ; then
 	    ldd_output=`ldd conftest`
 	    for i in $deplibs; do
-	      name=`expr $i : '-l\(.*\)'`
+	      name="`expr $i : '-l\(.*\)'`"
 	      # If $name is empty we are operating on a -L argument.
               if test "$name" != "" && test "$name" -ne "0"; then
 		if test "X$allow_libtool_libs_with_static_runtimes" = "Xyes" ; then
@@ -3467,7 +3470,7 @@ EOF
 	    # Error occurred in the first compile.  Let's try to salvage
 	    # the situation: Compile a separate program for each library.
 	    for i in $deplibs; do
-	      name=`expr $i : '-l\(.*\)'`
+	      name="`expr $i : '-l\(.*\)'`"
 	      # If $name is empty we are operating on a -L argument.
               if test "$name" != "" && test "$name" != "0"; then
 		$rm conftest
@@ -3519,7 +3522,7 @@ EOF
 	  set dummy $deplibs_check_method
 	  file_magic_regex=`expr "$deplibs_check_method" : "$2 \(.*\)"`
 	  for a_deplib in $deplibs; do
-	    name=`expr $a_deplib : '-l\(.*\)'`
+	    name="`expr $a_deplib : '-l\(.*\)'`"
 	    # If $name is empty we are operating on a -L argument.
             if test "$name" != "" && test  "$name" != "0"; then
 	      if test "X$allow_libtool_libs_with_static_runtimes" = "Xyes" ; then
@@ -3588,7 +3591,7 @@ EOF
 	  set dummy $deplibs_check_method
 	  match_pattern_regex=`expr "$deplibs_check_method" : "$2 \(.*\)"`
 	  for a_deplib in $deplibs; do
-	    name=`expr $a_deplib : '-l\(.*\)'`
+	    name="`expr $a_deplib : '-l\(.*\)'`"
 	    # If $name is empty we are operating on a -L argument.
 	    if test -n "$name" && test "$name" != "0"; then
 	      if test "X$allow_libtool_libs_with_static_runtimes" = "Xyes" ; then
@@ -3829,9 +3832,6 @@ EOF
 	        # The command line is too long to execute in one step.
 	        $show "using reloadable object file for export list..."
 	        skipped_export=:
-		# Break out early, otherwise skipped_export may be
-		# set to false by a later but shorter cmd.
-		break
 	      fi
 	    done
 	    IFS="$save_ifs"
@@ -3909,8 +3909,7 @@ EOF
 	  fi
 	fi
 
-	if test "X$skipped_export" != "X:" &&
-	   len=`expr "X$test_cmds" : ".*" 2>/dev/null` &&
+	if test "X$skipped_export" != "X:" && len=`expr "X$test_cmds" : ".*"` &&
 	   test "$len" -le "$max_cmd_len" || test "$max_cmd_len" -le -1; then
 	  :
 	else
@@ -3945,7 +3944,7 @@ EOF
 	  do
 	    eval test_cmds=\"$reload_cmds $objlist $last_robj\"
 	    if test "X$objlist" = X ||
-	       { len=`expr "X$test_cmds" : ".*" 2>/dev/null` &&
+	       { len=`expr "X$test_cmds" : ".*"` &&
 		 test "$len" -le "$max_cmd_len"; }; then
 	      objlist="$objlist $obj"
 	    else
@@ -4035,30 +4034,13 @@ EOF
 	  IFS="$save_ifs"
 	  eval cmd=\"$cmd\"
 	  $show "$cmd"
-	  $run eval "$cmd" || {
-	    lt_exit=$?
-
-	    # Restore the uninstalled library and exit
-	    if test "$mode" = relink; then
-	      $run eval '(cd $output_objdir && $rm ${realname}T && $mv ${realname}U $realname)'
-	    fi
-
-	    exit $lt_exit
-	  }
+	  $run eval "$cmd" || exit $?
 	done
 	IFS="$save_ifs"
 
 	# Restore the uninstalled library and exit
 	if test "$mode" = relink; then
 	  $run eval '(cd $output_objdir && $rm ${realname}T && $mv $realname ${realname}T && $mv "$realname"U $realname)' || exit $?
-
-	  if test -n "$convenience"; then
-	    if test -z "$whole_archive_flag_spec"; then
-	      $show "${rm}r $gentop"
-	      $run ${rm}r "$gentop"
-	    fi
-	  fi
-
 	  exit $EXIT_SUCCESS
 	fi
 
@@ -4403,7 +4385,7 @@ extern \"C\" {
 	    if test -z "$export_symbols"; then
 	      export_symbols="$output_objdir/$outputname.exp"
 	      $run $rm $export_symbols
-	      $run eval "${SED} -n -e '/^: @PROGRAM@ $/d' -e 's/^.* \(.*\)$/\1/p' "'< "$nlist" > "$export_symbols"'
+	      $run eval "${SED} -n -e '/^: @PROGRAM@$/d' -e 's/^.* \(.*\)$/\1/p' "'< "$nlist" > "$export_symbols"'
 	    else
 	      $run eval "${SED} -e 's/\([ ][.*^$]\)/\\\1/g' -e 's/^/ /' -e 's/$/$/'"' < "$export_symbols" > "$output_objdir/$outputname.exp"'
 	      $run eval 'grep -f "$output_objdir/$outputname.exp" < "$nlist" > "$nlist"T'
@@ -4805,7 +4787,6 @@ EOF
 EOF
 
 	    cat >> $cwrappersource <<"EOF"
-  return 127;
 }
 
 void *
@@ -5069,13 +5050,13 @@ else
 	# Backslashes separate directories on plain windows
 	*-*-mingw | *-*-os2*)
 	  $echo >> $output "\
-      exec \"\$progdir\\\\\$program\" \${1+\"\$@\"}
+      exec \$progdir\\\\\$program \${1+\"\$@\"}
 "
 	  ;;
 
 	*)
 	  $echo >> $output "\
-      exec \"\$progdir/\$program\" \${1+\"\$@\"}
+      exec \$progdir/\$program \${1+\"\$@\"}
 "
 	  ;;
 	esac
@@ -5085,7 +5066,7 @@ else
     fi
   else
     # The program doesn't exist.
-    \$echo \"\$0: error: \\\`\$progdir/\$program' does not exist\" 1>&2
+    \$echo \"\$0: error: \$progdir/\$program does not exist\" 1>&2
     \$echo \"This script is just a wrapper for \$program.\" 1>&2
     $echo \"See the $PACKAGE documentation for more information.\" 1>&2
     exit $EXIT_FAILURE
@@ -5208,7 +5189,7 @@ fi\
 	    oldobjs="$objlist $obj"
 	    objlist="$objlist $obj"
 	    eval test_cmds=\"$old_archive_cmds\"
-	    if len=`expr "X$test_cmds" : ".*" 2>/dev/null` &&
+	    if len=`expr "X$test_cmds" : ".*"` &&
 	       test "$len" -le "$max_cmd_len"; then
 	      :
 	    else
@@ -5405,11 +5386,11 @@ relink_command=\"$relink_command\""
     # install_prog (especially on Windows NT).
     if test "$nonopt" = "$SHELL" || test "$nonopt" = /bin/sh ||
        # Allow the use of GNU shtool's install command.
-       $echo "X$nonopt" | grep shtool > /dev/null; then
+       $echo "X$nonopt" | $Xsed | grep shtool > /dev/null; then
       # Aesthetically quote it.
       arg=`$echo "X$nonopt" | $Xsed -e "$sed_quote_subst"`
       case $arg in
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	arg="\"$arg\""
 	;;
       esac
@@ -5418,14 +5399,14 @@ relink_command=\"$relink_command\""
       shift
     else
       install_prog=
-      arg=$nonopt
+      arg="$nonopt"
     fi
 
     # The real first argument should be the name of the installation program.
     # Aesthetically quote it.
     arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
     case $arg in
-    *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+    *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
       arg="\"$arg\""
       ;;
     esac
@@ -5443,31 +5424,28 @@ relink_command=\"$relink_command\""
     do
       if test -n "$dest"; then
 	files="$files $dest"
-	dest=$arg
+	dest="$arg"
 	continue
       fi
 
       case $arg in
       -d) isdir=yes ;;
-      -f) 
-      	case " $install_prog " in
-	*[\\\ /]cp\ *) ;;
-	*) prev=$arg ;;
-	esac
-	;;
-      -g | -m | -o) prev=$arg ;;
+      -f) prev="-f" ;;
+      -g) prev="-g" ;;
+      -m) prev="-m" ;;
+      -o) prev="-o" ;;
       -s)
 	stripme=" -s"
 	continue
 	;;
-      -*)
-	;;
+      -*) ;;
+
       *)
 	# If the previous option needed an argument, then skip it.
 	if test -n "$prev"; then
 	  prev=
 	else
-	  dest=$arg
+	  dest="$arg"
 	  continue
 	fi
 	;;
@@ -5476,7 +5454,7 @@ relink_command=\"$relink_command\""
       # Aesthetically quote the argument.
       arg=`$echo "X$arg" | $Xsed -e "$sed_quote_subst"`
       case $arg in
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+      *$quote_scanset* | *]* | *\|* | *\&* | *\(* | *\)* | "")
 	arg="\"$arg\""
 	;;
       esac
@@ -5645,14 +5623,11 @@ relink_command=\"$relink_command\""
 
 	  if test "$#" -gt 0; then
 	    # Delete the old symlinks, and create new ones.
-	    # Try `ln -sf' first, because the `ln' binary might depend on
-	    # the symlink we replace!  Solaris /bin/ln does not understand -f,
-	    # so we also need to try rm && ln -s.
 	    for linkname
 	    do
 	      if test "$linkname" != "$realname"; then
-                $show "(cd $destdir && { $LN_S -f $realname $linkname || { $rm $linkname && $LN_S $realname $linkname; }; })"
-                $run eval "(cd $destdir && { $LN_S -f $realname $linkname || { $rm $linkname && $LN_S $realname $linkname; }; })"
+		$show "(cd $destdir && $rm $linkname && $LN_S $realname $linkname)"
+		$run eval "(cd $destdir && $rm $linkname && $LN_S $realname $linkname)"
 	      fi
 	    done
 	  fi
@@ -5665,16 +5640,7 @@ relink_command=\"$relink_command\""
 	    IFS="$save_ifs"
 	    eval cmd=\"$cmd\"
 	    $show "$cmd"
-	    $run eval "$cmd" || {
-	      lt_exit=$?
-
-	      # Restore the uninstalled library and exit
-	      if test "$mode" = relink; then
-		$run eval '(cd $output_objdir && $rm ${realname}T && $mv ${realname}U $realname)'
-	      fi
-
-	      exit $lt_exit
-	    }
+	    $run eval "$cmd" || exit $?
 	  done
 	  IFS="$save_ifs"
 	fi
@@ -5768,15 +5734,17 @@ relink_command=\"$relink_command\""
 	  notinst_deplibs=
 	  relink_command=
 
-	  # Note that it is not necessary on cygwin/mingw to append a dot to
-	  # foo even if both foo and FILE.exe exist: automatic-append-.exe
-	  # behavior happens only for exec(3), not for open(2)!  Also, sourcing
-	  # `FILE.' does not work on cygwin managed mounts.
-	  #
+	  # To insure that "foo" is sourced, and not "foo.exe",
+	  # finese the cygwin/MSYS system by explicitly sourcing "foo."
+	  # which disallows the automatic-append-.exe behavior.
+	  case $build in
+	  *cygwin* | *mingw*) wrapperdot=${wrapper}. ;;
+	  *) wrapperdot=${wrapper} ;;
+	  esac
 	  # If there is no directory component, then add one.
-	  case $wrapper in
-	  */* | *\\*) . ${wrapper} ;;
-	  *) . ./${wrapper} ;;
+	  case $file in
+	  */* | *\\*) . ${wrapperdot} ;;
+	  *) . ./${wrapperdot} ;;
 	  esac
 
 	  # Check the variables that should have been set.
@@ -5804,15 +5772,17 @@ relink_command=\"$relink_command\""
 	  done
 
 	  relink_command=
-	  # Note that it is not necessary on cygwin/mingw to append a dot to
-	  # foo even if both foo and FILE.exe exist: automatic-append-.exe
-	  # behavior happens only for exec(3), not for open(2)!  Also, sourcing
-	  # `FILE.' does not work on cygwin managed mounts.
-	  #
+	  # To insure that "foo" is sourced, and not "foo.exe",
+	  # finese the cygwin/MSYS system by explicitly sourcing "foo."
+	  # which disallows the automatic-append-.exe behavior.
+	  case $build in
+	  *cygwin* | *mingw*) wrapperdot=${wrapper}. ;;
+	  *) wrapperdot=${wrapper} ;;
+	  esac
 	  # If there is no directory component, then add one.
-	  case $wrapper in
-	  */* | *\\*) . ${wrapper} ;;
-	  *) . ./${wrapper} ;;
+	  case $file in
+	  */* | *\\*) . ${wrapperdot} ;;
+	  *) . ./${wrapperdot} ;;
 	  esac
 
 	  outputname=
@@ -5853,7 +5823,7 @@ relink_command=\"$relink_command\""
 	fi
 
 	# remove .exe since cygwin /usr/bin/install will append another
-	# one anyway 
+	# one anyways
 	case $install_prog,$host in
 	*/usr/bin/install*,*cygwin*)
 	  case $file:$destfile in
