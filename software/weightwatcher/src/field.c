@@ -110,7 +110,7 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     if (prefs.getarea)
       n+=2;
 
-    if (fitsfind(field->fitshead, "END     ")+n >= field->fitsheadsize/80)
+    if (fitsfind(field->fitshead, "END     ")+n > field->fitsheadsize/80)
       {
       QCALLOC(field->fitshead, char, field->fitsheadsize+FBSIZE);
       memcpy(field->fitshead, mfield->fitshead, field->fitsheadsize);
