@@ -223,7 +223,7 @@
          <el><xsl:value-of select="TD[$ext]"/></el>
         </td>
         <td align="right" BGCOLOR="#EEEEEE">
-         <el><xsl:value-of select="format-number(TD[$effarea],'##0.0000')"/></el>
+         <el><xsl:value-of select="format-number(TD[$effarea],'##0.000000')"/></el>
         </td>
        </tr>
       </xsl:for-each>

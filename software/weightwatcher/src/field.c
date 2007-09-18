@@ -91,8 +91,9 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       }
     else
       {
-      if (!(field->file = fopen(field->filename, "ab")))
+      if (!(field->file = fopen(field->filename, "rb+")))
         error(EXIT_FAILURE,"*Error*: Cannot append to ",field->filename);
+      fseek(field->file, 0L, SEEK_END);
       }
     n = 1; /* Avoid gcc -Wall warnings */
 /* Looking for copyright Keywords */
@@ -108,7 +109,13 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
       n++;
 
     if (prefs.getarea)
-      n+=2;
+      {
+      if ((fitsfind(field->fitshead, "EFF_AREA")==RETURN_ERROR))
+        n++;
+      if ((fitsfind(field->fitshead, "FLAGAREA")==RETURN_ERROR) && 
+           (fitsfind(field->fitshead, "WEIGAREA")==RETURN_ERROR))
+        n++;
+      }
 
     if (fitsfind(field->fitshead, "END     ")+n > field->fitsheadsize/80)
       {
@@ -146,25 +153,21 @@ picstruct	*newfield(char *filename, int flags, picstruct *mfield,
     fitswrite(field->fitshead, "ORIGIN  ", BANNER, H_STRING, T_STRING);
     if (flags & FLAG_FIELD)
       {
-      ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
-      fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
-      fitswrite(field->fitshead, "OBJECT  ", "FLAG MAP", H_STRING,T_STRING);
       if (prefs.getarea)
         fitsadd(field->fitshead, "FLAGAREA",
             "Bits which will not be accounted in the area");
+      ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
+      fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
+      fitswrite(field->fitshead, "OBJECT  ", "FLAG MAP", H_STRING,T_STRING);
       }
     else
       {
+      if (prefs.getarea)
+        fitsadd(field->fitshead, "WEIGAREA",
+            "Weight inferior limit accounted in the area");
       ival = 1; fitswrite(field->fitshead, "BITSGN  ",&ival, H_INT, T_LONG);
       fitswrite(field->fitshead, "OBJECT  ", "WEIGHT MAP", H_STRING,T_STRING);
       field->bitpix = BP_FLOAT;
-      if (prefs.getarea)
-        {
-        fitsadd(field->fitshead, "WEIGAREA",
-            "Weight inferior limit accounted in the area");
-        fitswrite(field->fitshead, "WEIGAREA",&prefs.weightlim,H_FLOAT,
-            T_DOUBLE);
-        }
       }
     fitswrite(field->fitshead, "BITPIX  ", &field->bitpix, H_INT, T_LONG);
     field->bytepix = (field->bitpix>0?field->bitpix:-field->bitpix)>>3;

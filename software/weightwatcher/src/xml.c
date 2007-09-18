@@ -288,7 +288,7 @@ int	write_xml_meta(FILE *file, char *error)
     {
     x = &ww_xml[n];
     fprintf(file, "    <TR>\n"
-        "     <TD>%s</TD><TD>%s</TD><TD>%d</TD><TD>%.6g</TD>\n",
+        "     <TD>%s</TD><TD>%s</TD><TD>%d</TD><TD>%.8g</TD>\n",
         x->fieldname,
         x->fieldtype,
         x->ext,

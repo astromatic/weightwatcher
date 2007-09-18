@@ -393,13 +393,15 @@ void	makeit(void)
       if (owfield)
         {
         farea0 = (double)(area0)/(double)(width*height);
-        NPRINTF(OUTPUT, "> Fraction of pixels weighted more than %4.2f = %6.4e\n",prefs.weightlim,farea0);
+        NPRINTF(OUTPUT, "> Fraction of pixels weighted more than %7.5e = %8.6e\n",prefs.weightlim,farea0);
         arposw=ftell(owfield->file);
         headposw=arposw-(owfield->npix*owfield->bytepix)
              -owfield->fitsheadsize;
         /* -- writing EFF_AREA keyword in weight header  */
-        fseek(owfield->file,headposw,SEEK_SET);
         fitswrite(owfield->fitshead, "EFF_AREA",&farea0,H_FLOAT,T_DOUBLE);
+        fitswrite(owfield->fitshead, "WEIGAREA",&prefs.weightlim,H_FLOAT,
+            T_DOUBLE);
+        fseek(owfield->file,headposw,SEEK_SET);
         QFWRITE(owfield->fitshead,owfield->fitsheadsize,
                owfield->file, owfield->rfilename);
         fseek(owfield->file,arposw,SEEK_SET);
@@ -413,14 +415,14 @@ void	makeit(void)
 	  NPRINTF(OUTPUT, "%d OR ",prefs.geta_flags[t]);
         NPRINTF(OUTPUT, "%d ",prefs.geta_flags[prefs.ngeta_flags-1]);
         NPRINTF(OUTPUT, "= %ld\n",area);
-        NPRINTF(OUTPUT, "> Fraction of pixels not flagged= %6.4e\n",farea);
+        NPRINTF(OUTPUT, "> Fraction of pixels not flagged= %8.6e\n",farea);
         arposf=ftell(offield->file);
         headposf=arposf-(offield->npix*offield->bytepix)
              -offield->fitsheadsize;
         /* -- writing EFF_AREA keyword in flag header  */
-        fseek(offield->file,headposf,SEEK_SET);
-        fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
         fitswrite(offield->fitshead, "EFF_AREA",&farea,H_FLOAT,T_DOUBLE);
+        fitswrite(offield->fitshead, "FLAGAREA",&flagmask, H_INT,T_LONG);
+        fseek(offield->file,headposf,SEEK_SET);
         QFWRITE(offield->fitshead,offield->fitsheadsize,
                offield->file, offield->rfilename);
         fseek(offield->file,arposf,SEEK_SET);
@@ -450,7 +452,6 @@ void	makeit(void)
       if (prefs.xml_flag)
         update_xml(offield, ext, "F");
       endfield(offield);
-
       }
     free(charpix);
     }
