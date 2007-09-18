@@ -85,7 +85,8 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
-AC_CHECK_FUNCS([atexit memmove memset munmap pow sqrt strchr strcspn strpbrk strrchr strspn strstr strtol])
+AC_CHECK_FUNCS([atexit getenv memmove memset munmap pow sqrt strchr strcspn \
+strpbrk strrchr strspn strstr strtol])
 
 # Check support for large files
 AC_SYS_LARGEFILE
