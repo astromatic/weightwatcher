@@ -10,6 +10,9 @@ EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYING \
 RPM_ROOTDIR 		= `rpmbuild --nobuild -E %_topdir`
 RPM_SRCDIR 		= $(RPM_ROOTDIR)/SOURCES
 
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
+
 rpm:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
 	rpmbuild -ba --clean $(PACKAGE_NAME).spec $(PACKAGE_NAME)-mp.spec

@@ -4,6 +4,7 @@
         <!ENTITY deg "&#176;">
         <!ENTITY amin "&#180;">
         <!ENTITY asec "&#168;">
+        <!ENTITY copy "&#169;">
         ]>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -67,18 +68,18 @@
         <TABLE BORDER="0">
          <TR>
           <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixLogo.png" ALT="Terapix"/>
+           <a href="http://terapix.iap.fr"><IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixLogo.png" ALT="Terapix" title="Terapix" border="0"/></a>
           </TD>
           <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixTitle.png" ALT="Logo"/>
+           <a href="http://terapix.iap.fr"><IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixTitle.png" ALT="Logo" title="Terapix" border="0"/></a>
           </TD>
-          <TD ALIGN="CENTER">
+          <TD ALIGN="CENTER" width="2000">
            <FONT color="#669933">
             <B> Processing summary</B>
            </FONT>
           </TD>
           <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixPicture.gif" ALT="Terapix banner"/>
+           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixPicture.gif" title="Star Formation Region IC 1396, &copy; 2002 CFHT" ALT="Star Formation Region IC 1396, &copy; 2002 CFHT"/>
           </TD>
          </TR>
         </TABLE>
