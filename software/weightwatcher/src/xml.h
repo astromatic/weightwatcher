@@ -30,7 +30,7 @@
 /*--------------------------------- typedefs --------------------------------*/
 typedef struct
   {
-  char         fieldname[80];               /* name of the file */
+  char         fieldname[MAXCHAR];          /* name of the file */
   char         fieldtype[2];                /* F flag, W weight */
   int          ext;                         /* extension */
   float        effarea;                     /* effective surface */
