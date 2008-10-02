@@ -38,24 +38,24 @@ typedef struct
   int		nweight_threshd;			/* number of params */
   double	weight_threshu[MAXNIMAGE];		/* maximum WEIGHT */
   int		nweight_threshu;			/* number of params */
-  FLAGTYPE	weight_mask[MAXNIMAGE];			/* WEIGHT flags */
+  WWFLAGTYPE	weight_mask[MAXNIMAGE];			/* WEIGHT flags */
   int		nweight_mask;				/* number of params */
-  FLAGTYPE	vec_mask[MAXNIMAGE];			/* POLY flags */
+  WWFLAGTYPE	vec_mask[MAXNIMAGE];			/* POLY flags */
   int		nvec_mask;				/* number of params */
   double	vec_weight[MAXNIMAGE];			/* POLY weights */
   char          *intersec;                              /* flag intersection?*/
   int		nvec_weight;				/* number of params */
-  FLAGTYPE	flag_wmask[MAXNIMAGE];			/* FLAG weight-mask */
+  WWFLAGTYPE	flag_wmask[MAXNIMAGE];			/* FLAG weight-mask */
   int		nflag_wmask;				/* number of params */
-  FLAGTYPE	flag_fmask[MAXNIMAGE];			/* intput FLAG-mask */
+  WWFLAGTYPE	flag_fmask[MAXNIMAGE];			/* intput FLAG-mask */
   int		nflag_fmask;				/* number of params */
-  FLAGTYPE	flag_ofmask[32];			/* output FLAGs */
+  WWFLAGTYPE	flag_ofmask[32];			/* output FLAGs */
   int		nflag_ofmask;				/* number of params */
   char		*oweight_name;				/* output WEIGHT */
   char		*oflag_name;				/* output FLAG */
   char          *getarea;                               /* compute area? */
   double         weightlim;                             /* weight limit for area */
-  FLAGTYPE      geta_flags[MAXNIMAGE];                  /* flags for area */
+  WWFLAGTYPE      geta_flags[MAXNIMAGE];                  /* flags for area */
   int           ngeta_flags;                            /* number of params */
   int		mem_bufsize;				/* # of buffer lines */
 

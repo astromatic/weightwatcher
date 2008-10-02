@@ -1,5 +1,5 @@
 # Main Makefile for WeightWatcher
-# Copyright (C) 2003-2007 Emmanuel Bertin Chiara Marmo.
+# Copyright (C) 2003-2008 Emmanuel Bertin & Chiara Marmo.
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
 dist_pkgdata_DATA	= xsl/ww.xsl
@@ -9,13 +9,16 @@ EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYING \
 
 RPM_ROOTDIR 		= `rpmbuild --nobuild -E %_topdir`
 RPM_SRCDIR 		= $(RPM_ROOTDIR)/SOURCES
-
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
 rpm:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	rpmbuild -ba --clean $(PACKAGE_NAME).spec $(PACKAGE_NAME)-mp.spec
+	rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
+
+rpm-icc:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	USE_ICC="1" rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
 
 rpm-opteron:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
@@ -42,3 +45,4 @@ rpm-athlon-icc:	dist
 
 icc:
 	$(MAKE) CC="icc" CFLAGS="-O3 -g -axWP -ip -unroll" LIBS="-lm"
+

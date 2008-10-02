@@ -32,7 +32,7 @@ typedef struct vec
   struct seg	*segment;		/* Ptr to an array of line segments */
   int		nsegment;		/* Number of line segments */
   int		npoly;			/* Number of polygons involved */
-  FLAGTYPE	ofmask;			/* Bit-mask to be OR'ed in output */
+  WWFLAGTYPE	ofmask;			/* Bit-mask to be OR'ed in output */
   PIXTYPE	weight;			/* Weight factor applied to weightmap*/
   }	vecstruct;
 

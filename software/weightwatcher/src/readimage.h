@@ -23,7 +23,7 @@
 
 /*-------------------------------- protos -----------------------------------*/
 void		readdata(picstruct *field, PIXTYPE *ptr, int size),
-		readidata(picstruct *field, FLAGTYPE *ptr, int size),
+		readidata(picstruct *field, WWFLAGTYPE *ptr, int size),
 		readimagehead(picstruct *field);
 
 char		*readfitshead(FILE *file, char *filename, int *nblock);

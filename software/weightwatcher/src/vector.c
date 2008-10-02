@@ -216,7 +216,7 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
   {
    segstruct	 *seg, *segpoly;
    crosstruct	 *crosslist;
-   FLAGTYPE	 *flagbuf, ofmask;
+   WWFLAGTYPE	 *flagbuf, ofmask;
    PIXTYPE	 *pixbuf,
 		 weight;
    float	 y;
@@ -242,7 +242,7 @@ void	vec_to_map(vecstruct *vector, picstruct *wfield, picstruct *ffield,
     return;
 
   ofmask = vector->ofmask;
-  flagbuf = ffield? (FLAGTYPE *)ffield->strip : NULL;
+  flagbuf = ffield? (WWFLAGTYPE *)ffield->strip : NULL;
   weight = vector->weight;
   pixbuf = wfield? (PIXTYPE *)wfield->strip : NULL;
 

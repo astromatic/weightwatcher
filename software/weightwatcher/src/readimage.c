@@ -221,13 +221,13 @@ void	readdata(picstruct *field, PIXTYPE *ptr, int size)
 /*
 read and convert input data stream in int format.
 */
-void	readidata(picstruct *field, FLAGTYPE *ptr, int size)
+void	readidata(picstruct *field, WWFLAGTYPE *ptr, int size)
   {
   static char	bufdata0[DATA_BUFSIZE];
   char		*bufdata;
   short		val16;
   int		i, bowl, spoonful, npix;
-  FLAGTYPE	curval, dval;
+  WWFLAGTYPE	curval, dval;
   switch(field->compress_type)
     {
 /*-- Uncompressed image */

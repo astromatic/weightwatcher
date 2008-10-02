@@ -1,12 +1,12 @@
 # configure.in for WeightWatcher
-# (C) E.Bertin C. Marmo 2003-2007
+# (C) E.Bertin C. Marmo 2003-2008
 # Process this file with autoconf to produce a configure script.
 # First, disable the annoying config.cache
 define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.8.7, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.8.8, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AM_CONFIG_HEADER(config.h)
@@ -49,17 +49,13 @@ AC_ARG_ENABLE(icc,
 
 # Checks for programs.
 # GCC is chosen last because it is likely to yield less optimized code
-AC_LANG(C)
 AC_PROG_CC([$cclist])
-
 # C Compiler: Check that it is ANSI C
 AM_PROG_CC_STDC
-AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
-
 # C Compiler: Check that it is POSIX-compliant
 AC_ISC_POSIX
 ACX_PROG_CC_OPTIM
+AC_PROG_RANLIB
 AC_PROG_INSTALL
 
 # Checks for libraries.
@@ -92,8 +88,8 @@ strpbrk strrchr strspn strstr strtol])
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-AC_DEFINE(_FILE_OFFSET_BITS, 64, [off_t size])
-AC_DEFINE(_LARGEFILE64_SOURCE, 1, [enable 64bit file pointers])
+#AC_DEFINE(_FILE_OFFSET_BITS, 64, [off_t size])
+#AC_DEFINE(_LARGEFILE64_SOURCE, 1, [enable 64bit file pointers])
 
 # Set the data directory to a true absolute path
 datadir2=$(URBI_RESOLVE_DIR([$datadir]))
@@ -129,11 +125,6 @@ AC_ARG_ENABLE(static,
         use_static="no"
         AC_MSG_RESULT([no]))
 
-# Special optimization options for the INTEL C compiler
-if test $use_icc = "yes" -a $CC = "icc"; then
-  CFLAGS="-O -axWP -ip -unroll"
-fi
-
 if test "$use_gprof" = "yes"; then
   if test "$use_icc" = "yes"; then
     CFLAGS="$CFLAGS -pq"
@@ -144,8 +135,16 @@ if test "$use_gprof" = "yes"; then
 fi
 
 if test "$use_static" = "yes"; then
-  LDFLAGS="$LDFLAGS -all-static"
+  LDFLAGS="-static -shared-libgcc $LDFLAGS"
 fi
+
+# Override automatic CFLAGS and LDFLAGS with those of user
+#if test -n "$mycflags"; then
+#CFLAGS="$mycflags"
+#fi
+#if test -n "$myldflags"; then
+#LDFLAGS="$myldflags"
+#fi
 
 # Display compiler and linker flags
 AC_MSG_RESULT([***************************************************************])

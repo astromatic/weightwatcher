@@ -41,7 +41,7 @@ void	makeit(void)
    picstruct	**wfield, **ffield, *field, *owfield, *offield;
    PIXTYPE	*pix, *pixin, *owstrip, *weight,
 		val, threshd,threshu;
-   FLAGTYPE	*flagin, *flag,
+   WWFLAGTYPE	*flagin, *flag,
 		*pofmask,*ofmask,*fmask2,
 		nofmask, flagmask, fmask,wmask,fval, maxbit;
    int		i,j, t, padsize, ext, next, ntab, nxml;
@@ -249,7 +249,7 @@ void	makeit(void)
         for (pix=owfield->strip,npix=spoonful;npix--;)
           *(pix++) = 1.0;
       if (offield)
-        memset(offield->strip, 0, (size_t)spoonful*sizeof(FLAGTYPE));
+        memset(offield->strip, 0, (size_t)spoonful*sizeof(WWFLAGTYPE));
 
 /*---- First step: extract info from input weight maps */
       for (i=0; i<prefs.nweight_name; i++)
@@ -283,10 +283,10 @@ void	makeit(void)
       for (i=0; i<prefs.nflag_name; i++)
         {
         field = ffield[i];
-        readidata(field, (FLAGTYPE *)field->strip, spoonful);
+        readidata(field, (WWFLAGTYPE *)field->strip, spoonful);
         if (owfield && (wmask=field->wmask))
           {
-          flagin = (FLAGTYPE *)field->strip;
+          flagin = (WWFLAGTYPE *)field->strip;
           pix = owfield->strip;
           for (npix = spoonful; npix--; pix++)
             if (*(flagin++)&wmask)
@@ -295,7 +295,7 @@ void	makeit(void)
 
         if (offield && (fmask=field->fmask))
           {
-          flagin = (FLAGTYPE *)field->strip;
+          flagin = (WWFLAGTYPE *)field->strip;
           flag = offield->strip;
           for (npix = spoonful; npix--; flag++)
             if ((fval=*(flagin++))&fmask)
@@ -339,13 +339,13 @@ void	makeit(void)
 	if (prefs.getarea)
           {
           /* Computing area having flag on flag image*/
-          flag = (FLAGTYPE *)offield->strip;
+          flag = (WWFLAGTYPE *)offield->strip;
           for (npix = spoonful; npix--;)
             area += ((*(flag++)&flagmask)!=0);
           }
         if (offield->bitpix!=BP_LONG)
           {
-          flag = (FLAGTYPE *)offield->strip;
+          flag = (WWFLAGTYPE *)offield->strip;
           switch(offield->bitpix)
             {
             case BP_BYTE:

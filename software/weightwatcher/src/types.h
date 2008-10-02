@@ -24,7 +24,7 @@
 
 /*--------------------------------- typedefs --------------------------------*/
 typedef	unsigned char	BYTE;			/* a byte */
-typedef	int		FLAGTYPE;		/* FLAG pixel type */
+typedef	int		WWFLAGTYPE;		/* FLAG pixel type */
 typedef	unsigned short	USHORT;			/* 0 to 65535 integers */
 
 typedef	int		LONG;
@@ -60,11 +60,11 @@ typedef struct
   int		flags;			/* flags defining the field type */
 /*---- WEIGHT-stuff */
   PIXTYPE	threshd, threshu;	/* lower and upper thresholds */
-  FLAGTYPE	wmask;			/* threshold detection mask */
+  WWFLAGTYPE	wmask;			/* threshold detection mask */
 /*---- FLAG-stuff */
-  FLAGTYPE	ofmask[32];		/* output mask (max 1 per bit) */
-  FLAGTYPE	fmask;			/* FLAG detection mask */
-  FLAGTYPE	fmask2[32];		/* Positions of active FLAG bits */
+  WWFLAGTYPE	ofmask[32];		/* output mask (max 1 per bit) */
+  WWFLAGTYPE	fmask;			/* FLAG detection mask */
+  WWFLAGTYPE	fmask2[32];		/* Positions of active FLAG bits */
   int		nfmask;			/* number of active FLAG bits */
   OFF_T		mefpos;			/* Position in a MEF file */
   }	picstruct;
