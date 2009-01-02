@@ -1,0 +1,48 @@
+# Main Makefile for WeightWatcher
+# Copyright (C) 2003-2008 Emmanuel Bertin & Chiara Marmo.
+AUTOMAKE_OPTIONS	= foreign no-dependencies
+SUBDIRS			= man src
+dist_pkgdata_DATA	= xsl/ww.xsl
+EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYING \
+			  HISTORY INSTALL README THANKS \
+			  acx_prog_cc_optim.m4 acx_urbi_resolve_dir.m4
+
+RPM_ROOTDIR 		= `rpmbuild --nobuild -E %_topdir`
+RPM_SRCDIR 		= $(RPM_ROOTDIR)/SOURCES
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
+
+rpm:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
+
+rpm-icc:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	USE_ICC="1" rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
+
+rpm-opteron:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	TPXCC="gcc" TPXFLAGS="-O3 -funroll-loops -fomit-frame-pointer -Wall \
+		-march=opteron" rpmbuild -ba --target=x86_64 --clean \
+		$(PACKAGE_NAME).spec
+	                                                            
+
+rpm-athlon:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	TPXCC="gcc" TPXFLAGS="-O3 -funroll-loops -fomit-frame-pointer -Wall \
+		-m32 -march=i686 -msse -mfpmath=sse -mtune=athlon" rpmbuild \
+		-ba --target=i686 --clean $(PACKAGE_NAME).spec
+
+rpm-opteron-icc:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	TPXCC="icc" TPXFLAGS="-O3 -g -axWP -ip -unroll" rpmbuild -ba \
+		--target=x86_64 --clean $(PACKAGE_NAME).spec
+
+rpm-athlon-icc:	dist
+	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
+	TPXCC="icc32" TPXFLAGS="-O3 -g -axKWNPB -ip -unroll" rpmbuild \
+		-ba --target=i686 --clean $(PACKAGE_NAME).spec
+
+icc:
+	$(MAKE) CC="icc" CFLAGS="-O3 -g -axWP -ip -unroll" LIBS="-lm"
+

@@ -1,0 +1,19 @@
+WeightWatcher is a program that combines weight-maps, flag-maps and
+polygon data in order to produce control maps which can directly be
+used in astronomical image-processing packages like Swarp or
+SExtractor.
+
+This file describes shortly the SYNTAX of WeightWatcher.
+See INSTALL for instructions about install.
+For more information, please refer to the documentation
+(see http://terapix.iap.fr/soft/weightwatcher/ )
+
+The general SYNTAX or WeightWatcher is:
+
+% ww [-c <configuration_file>] [-<keyword> <value>]
+
+Please report any bug or strange behaviour on the Forum
+http://terapix.iap.fr/forum/forumdisplay.php?fid=18.
+
+					Emmanuel Bertin.
+                                        Chiara Marmo.

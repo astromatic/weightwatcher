@@ -1,0 +1,56 @@
+%define name @PACKAGE_NAME@
+%define version @PACKAGE_VERSION@
+%define release 1
+
+Summary: combine weight-maps, flag-maps and polygon data
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
+URL: http://terapix.iap.fr/soft/%{name}/
+License: GPLv3+
+Group: Sciences/Astronomy
+BuildRoot: %{_tmppath}/%{name}-buildroot
+BuildRequires: pkgconfig
+
+%description
+WeightWatcher is a program that combines weight-maps, flag-maps and
+polygon data in order to produce control maps which can directly be
+used in astronomical image-processing packages like Swarp or SExtractor.
+
+%prep
+%setup -q
+
+%build
+if test "$USE_ICC"; then
+%configure --enable-icc
+else
+%configure
+fi
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS doc/ww.pdf
+%{_bindir}/ww
+%{_mandir}/man1/ww.1*
+%{_mandir}/manx/ww.x*
+%{_datadir}/@PACKAGE_NAME@
+
+%changelog
+* @DATE2@ @PACKAGER@ <@PACKAGE_BUGREPORT@>
+- Automatic RPM rebuild
+* Tue Apr 13 2004 Emmanuel Bertin <bertin@iap.fr>
+- Second RPM build
+* Sun Jan 12 2003 Emmanuel Bertin <bertin@iap.fr>
+- First RPM build
+
+# end of file
+
