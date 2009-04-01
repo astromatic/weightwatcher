@@ -9,7 +9,7 @@
 *
 *	Contents:	global definitions.
 *
-*	Last modify:	03/05/2007
+*	Last modify:	01/04/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -25,14 +25,10 @@
 
 #define         BANNER          "WeightWatcher"
 #define		EXECUTABLE	"ww"
-#ifdef USE_THREADS
-#define		MYVERSION	VERSION "-MP"
-#else
 #define		MYVERSION	VERSION
-#endif
 #define         COPYRIGHT       "Emmanuel BERTIN <bertin@iap.fr> & Chiara MARMO <marmo@iap.fr>"
-#define		WEBSITE		"http://terapix.iap.fr/soft/weightwatcher"
-#define         INSTITUTE       "TERAPIX team at IAP  http://terapix.iap.fr"
+#define		WEBSITE		"http://astromatic.iap.fr/software/weightwatcher"
+#define         INSTITUTE       "IAP http://www.iap.fr"
 
 /*----------------------------- Physical constants --------------------------*/
 
