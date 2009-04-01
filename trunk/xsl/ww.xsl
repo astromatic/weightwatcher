@@ -287,7 +287,7 @@
     <BUTTON type="button" title="click to expand" onclick="showhideTable('warnings')">
      Warnings (limited to the last 100)&nbsp;&darr;
     </BUTTON>
-    <TABLE id="warnings" style="display: none">
+    <TABLE id="warnings" class="sortable" style="display: none">
      <TR style="font-size: 80%;">
       <TH>Date</TH>
       <TH>Time</TH>
