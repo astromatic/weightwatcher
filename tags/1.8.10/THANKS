@@ -1,0 +1,10 @@
+Erik Deul <deul@strw.leidenuniv.nl>
+	Found the name of the software!
+Mario Nonino <ts.astro.it>
+Christophe Benoist <benoist@obs-nice.fr>
+Thomas Erben <terben@astro.uni-bonn.de>
+Jan Kohnert <jkohnert@aip.de>
+	Help in discovering bugs or bringing suggestions
+Akim Demaille <akim@lrde.epita.fr>
+        for solving the $datarootdir issue and providing the URBI_RESOLVE_DIR()
+        function.
