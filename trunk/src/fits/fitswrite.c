@@ -9,7 +9,7 @@
 *
 *	Contents:	low-level functions for writing LDAC FITS catalogs.
 *
-*	Last modify:	17/07/2006
+*	Last modify:	02/11/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -75,7 +75,7 @@ INPUT	pointer to the catalog structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	09/09/2003
+VERSION	02/11/2009
  ***/
 void	save_tab(catstruct *cat, tabstruct *tab)
 
@@ -90,8 +90,6 @@ void	save_tab(catstruct *cat, tabstruct *tab)
    char		*buf, *inbuf, *outbuf, *fptr,*ptr;
    int		esize;
 
-/*  Make the table parameters reflect its content*/
-  update_tab(tab);
 /*  The header itself*/
   tabflag = save_head(cat, tab)==RETURN_OK?1:0;
 /*  Allocate memory for the output buffer */
@@ -265,7 +263,7 @@ INPUT	catalog structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	26/09/2004
+VERSION	02/11/2009
  ***/
 void	init_writeobj(catstruct *cat, tabstruct *tab, char **pbuf)
 
@@ -273,8 +271,6 @@ void	init_writeobj(catstruct *cat, tabstruct *tab, char **pbuf)
    keystruct	*key;
    int		k;
 
-/* Make the table parameters reflect its content*/
-  update_tab(tab);
 /* The header itself */
   if (save_head(cat, tab) != RETURN_OK)
     error(EXIT_FAILURE, "*Error*: Not a binary table: ", tab->extname);
@@ -386,7 +382,7 @@ INPUT	Output stream
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	12/07/2006
+VERSION	02/11/2009
  ***/
 void	print_obj(FILE *stream, tabstruct *tab)
 
@@ -422,6 +418,11 @@ void	print_obj(FILE *stream, tabstruct *tab)
           break;
         case T_LONG:
           fprintf(stream, *key->printf?key->printf:"%d", *(int *)ptr);
+          if (i)
+            putc(' ', stream);
+          break;
+        case T_LONGLONG:
+          fprintf(stream, *key->printf?key->printf:"%lld", *(LONGLONG *)ptr);
           if (i)
             putc(' ', stream);
           break;
@@ -463,7 +464,7 @@ INPUT	Output stream
 OUTPUT	-.
 NOTES	-.
 AUTHOR	G. Tissier & E.Bertin (IAP)
-VERSION	12/07/2006
+VERSION	02/11/2009
  ***/
 void	voprint_obj(FILE *stream, tabstruct *tab)
 
@@ -503,6 +504,11 @@ void	voprint_obj(FILE *stream, tabstruct *tab)
           break;
         case T_LONG:
           fprintf(stream, *key->printf?key->printf:"%d", *(int *)ptr);
+          if (i)
+            putc(' ', stream);
+          break;
+        case T_LONGLONG:
+          fprintf(stream, *key->printf?key->printf:"%lld", *(LONGLONG *)ptr);
           if (i)
             putc(' ', stream);
           break;
