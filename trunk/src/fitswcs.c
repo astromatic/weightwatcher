@@ -1,18 +1,31 @@
 /*
- 				fitswcs.c
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*				fitswcs.c
 *
-*	Part of:	LDACTools+
+* Manage World Coordinate System data.
 *
-*	Author:		E.BERTIN (IAP)
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Contents:       Read and write WCS header info.
+*	This file part of:	AstrOmatic software
 *
-*	Last modify:	08/02/2007
+*	Copyright:		(C) 1993-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+*	License:		GNU General Public License
+*
+*	AstrOmatic software is free software: you can redistribute it and/or
+*	modify it under the terms of the GNU General Public License as
+*	published by the Free Software Foundation, either version 3 of the
+*	License, or (at your option) any later version.
+*	AstrOmatic software is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with AstrOmatic software.
+*	If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		10/10/2010
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
@@ -149,7 +162,7 @@ INPUT	WCS structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/09/2006
+VERSION	17/05/2007
  ***/
 void	init_wcs(wcsstruct *wcs)
 
@@ -232,8 +245,8 @@ void	init_wcs(wcsstruct *wcs)
     n = 0;
     for (l=100; l--;)
       {
-      wcs->prj->p[l] = wcs->projp[l+lng*100];
-      wcs->prj->p[l+100] = wcs->projp[l+lat*100];
+      wcs->prj->p[l] = wcs->projp[l+lat*100];	/* lat comes first for ... */
+      wcs->prj->p[l+100] = wcs->projp[l+lng*100];/* ... compatibility reasons */
       if (!n && (wcs->prj->p[l] || wcs->prj->p[l+100]))
         n = l+1;
       }
@@ -315,7 +328,7 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	17/07/2006
+VERSION	30/07/2010
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
@@ -349,6 +362,13 @@ wcsstruct	*read_wcs(tabstruct *tab)
   FITSREADS(buf, "OBJECT  ", str, "Unnamed");
 
   QCALLOC(wcs, wcsstruct, 1);
+  if (tab->naxis > NAXIS)
+    {
+    warning("Maximum number of dimensions supported by this version of the ",
+	"software exceeded\n");
+    tab->naxis = 2;
+    }
+
   wcs->naxis = naxis = tab->naxis;
   QCALLOC(wcs->projp, double, naxis*100);
 
@@ -426,7 +446,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
     else
       {
 /*---- Search for an observation date expressed in "civilian" format */
-      FITSREADS(buf, "DATE-OBS ", str, "");
+      FITSREADS(buf, "DATE-OBS", str, "");
       if (*str)
         {
 /*------ Decode DATE-OBS format: DD/MM/YY or YYYY-MM-DD */
@@ -563,7 +583,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
         for (l=0; l<naxis; l++)
           for (j=0; j<100; j++)
             {
-            sprintf(str, "PV%d_%d", l+1, j);
+            sprintf(str, "PV%d_%d ", l+1, j);
             FITSREADF(buf, str, wcs->projp[j+l*100], 0.0);
             }
       }
@@ -571,6 +591,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
 
 /* Initialize other WCS structures */
   init_wcs(wcs);
+
 /* Find the range of coordinates */
   range_wcs(wcs);
 /* Invert projection corrections */
@@ -592,11 +613,12 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	17/07/2006
+VERSION	01/09/2010
  ***/
 void	write_wcs(tabstruct *tab, wcsstruct *wcs)
 
   {
+   double	mjd;
    char		str[MAXCHARS];
    int		j, l, naxis;
 
@@ -613,6 +635,12 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
     }
   addkeywordto_head(tab, "EQUINOX ", "Mean equinox");
   fitswrite(tab->headbuf, "EQUINOX ", &wcs->equinox, H_FLOAT, T_DOUBLE);
+  if (wcs->obsdate!=0.0)
+    {
+    mjd = (wcs->obsdate-2000.0)*365.25 + MJD2000;
+    addkeywordto_head(tab, "MJD-OBS ", "Modified Julian date at start");
+    fitswrite(tab->headbuf, "MJD-OBS ", &mjd, H_EXPO,T_DOUBLE);
+    }
   addkeywordto_head(tab, "RADECSYS", "Astrometric system");
   switch(wcs->radecsys)
     {
@@ -890,7 +918,7 @@ INPUT	WCS structure.
 OUTPUT	-.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/08/2006
+VERSION	24/08/2010
  ***/
 void	range_wcs(wcsstruct *wcs)
 
@@ -928,7 +956,7 @@ void	range_wcs(wcsstruct *wcs)
     }
 
   if (lng!=lat)
-    lc = fmod(world[lng]+180.0, 360.0);
+    lc = world[lng];
   else
     {
     lc = 0.0;   /* to avoid gcc -Wall warnings */
@@ -970,20 +998,26 @@ void	range_wcs(wcsstruct *wcs)
   for (j=npoints; j--;)
     {
     raw_to_wcs(wcs, raw, world);
+/*-- Compute maximum distance to center */
+    if ((rad=wcs_dist(wcs, world, worldc)) > radmax)
+      radmax = rad;
     for (i=0; i<naxis; i++)
       {
 /*---- Handle longitudes around 0 */
-      if (i==lng && world[i]>lc)
-        world[i] -= 359.9999;
+      if (i==lng)
+        {
+        world[i] -= lc;
+        if (world[i]>180.0)
+          world[i] -= 360.0;
+        else if (world[i] <= -180.0)
+          world[i] += 360.0;
+        }
       if (world[i]<worldmin[i])
         worldmin[i] = world[i];
       if (world[i]>worldmax[i])
         worldmax[i] = world[i];
       }
 
-/*-- Compute maximum distance to center */
-    if ((rad=wcs_dist(wcs, world, worldc)) > radmax)
-      radmax = rad;
 
     for (i=0; i<naxis; i++)
       {
@@ -1002,6 +1036,8 @@ void	range_wcs(wcsstruct *wcs)
 
   if (lng!=lat)
     {
+    worldmin[lng] = fmod_0_p360(worldmin[lng]+lc);
+    worldmax[lng] = fmod_0_p360(worldmax[lng]+lc);
     if (worldmax[lat]<-90.0)
       worldmax[lat] = -90.0;
     if (worldmax[lat]>90.0)
@@ -1481,7 +1517,7 @@ INPUT	WCS structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	20/02/2005
+VERSION	03/01/2008
  ***/
 double	wcs_scale(wcsstruct *wcs, double *pixpos)
 
@@ -1490,10 +1526,16 @@ double	wcs_scale(wcsstruct *wcs, double *pixpos)
    double	dpos1,dpos2;
    int		lng, lat;
 
-  lng = wcs->lng;
-  lat = wcs->lat;
   if (raw_to_wcs(wcs, pixpos, wcspos))
     return 0.0;
+
+  lng = wcs->lng;
+  lat = wcs->lat;
+  if (lng == lat)
+    {
+    lng = 0;
+    lat = 1;
+    }
 
 /* Compute pixel scale */
   pixpos2[lng] = pixpos[lng] + 1.0;
@@ -1505,18 +1547,81 @@ double	wcs_scale(wcsstruct *wcs, double *pixpos)
   if (raw_to_wcs(wcs, pixpos2, wcspos2))
     return 0.0;
   dpos1 = wcspos1[lng]-wcspos[lng];
-  if (dpos1>180.0)
-    dpos1 -= 360.0;
-  else if (dpos1<-180.0)
-    dpos1 += 360.0;
   dpos2 = wcspos2[lng]-wcspos[lng];
-  if (dpos2>180.0)
-    dpos2 -= 360.0;
-  else if (dpos2<-180.0)
-    dpos2 += 360.0;
-  return fabs((dpos1*(wcspos2[lat]-wcspos[lat])
-		-(wcspos1[lat]-wcspos[lat])*dpos2)
-		*cos(wcspos[lat]*DEG));
+  if (wcs->lng!=wcs->lat)
+    {
+    if (dpos1>180.0)
+      dpos1 -= 360.0;
+    else if (dpos1<-180.0)
+      dpos1 += 360.0;
+    if (dpos2>180.0)
+      dpos2 -= 360.0;
+    else if (dpos2<-180.0)
+      dpos2 += 360.0;
+    return fabs((dpos1*(wcspos2[lat]-wcspos[lat])
+		-(wcspos1[lat]-wcspos[lat])*dpos2)*cos(wcspos[lat]*DEG));
+    }
+  else
+    return fabs((dpos1*(wcspos2[lat]-wcspos[lat])
+		-(wcspos1[lat]-wcspos[lat])*dpos2));
+  }
+
+
+/****** wcs jacobian *********************************************************
+PROTO	double wcs_jacobian(wcsstruct *wcs, double *pixpos, double *jacob)
+PURPOSE	Compute the local Jacobian matrice of the astrometric deprojection.
+INPUT	WCS structure,
+	Pointer to the array of local raw coordinates,
+	Pointer to the jacobian array (output).
+OUTPUT	Determinant over spatial coordinates (=pixel area), or -1.0 if mapping
+	was unsuccesful.
+NOTES   Memory must have been allocated (naxis*naxis*sizeof(double)) for the
+        Jacobian array.
+AUTHOR	E. Bertin (IAP)
+VERSION	11/10/2007
+ ***/
+double	wcs_jacobian(wcsstruct *wcs, double *pixpos, double *jacob)
+  {
+   double	pixpos0[NAXIS], wcspos0[NAXIS], wcspos[NAXIS],
+		dpos;
+   int		i,j, lng,lat,naxis;
+
+  lng = wcs->lng;
+  lat = wcs->lat;
+  naxis = wcs->naxis;
+  for (i=0; i<naxis; i++)
+    pixpos0[i] = pixpos[i];
+  if (raw_to_wcs(wcs, pixpos0, wcspos0) == RETURN_ERROR)
+    return -1.0;
+  for (i=0; i<naxis; i++)
+    {
+    pixpos0[i] += 1.0;
+    if (raw_to_wcs(wcs, pixpos0, wcspos) == RETURN_ERROR)
+      return -1.0;
+    pixpos0[i] -= 1.0;
+    for (j=0; j<naxis; j++)
+      {
+      dpos = wcspos[j]-wcspos0[j];
+      if (lng!=lat && j==lng)
+        {
+        if (dpos>180.0)
+          dpos -= 360.0;
+        else if (dpos<-180.0)
+          dpos += 360.0;
+        dpos *= cos(wcspos0[lat]*DEG);
+        }
+      jacob[j*naxis+i] = dpos;
+      }
+    }
+
+  if (lng==lat)
+    {
+    lng = 0;
+    lat = 1;
+    }
+
+  return fabs(jacob[lng+naxis*lng]*jacob[lat+naxis*lat]
+		- jacob[lat+naxis*lng]*jacob[lng+naxis*lat]);
   }
 
 
@@ -1559,7 +1664,7 @@ INPUT	WCS structure,
 OUTPUT	-.
 NOTES	Epoch for coordinates should be J2000 (FK5 system).
 AUTHOR	E. Bertin (IAP)
-VERSION	26/01/2005
+VERSION	04/01/2008
  ***/
 void	precess_wcs(wcsstruct *wcs, double yearin, double yearout)
 
@@ -1590,12 +1695,12 @@ void	precess_wcs(wcsstruct *wcs, double yearin, double yearout)
 	- sin(wcs->crval[lat]*DEG)*cos(dalpha)))/DEG
 	: 0.0;
 
-/* A = B*C */
+/* A = C*B */
   c = wcs->cd;
 /* The B matrix is made of 2 numbers */
 
   cas = cos(angle*DEG);
-  sas = sin(angle*DEG);
+  sas = sin(-angle*DEG);
   for (i=0; i<naxis; i++)
     b[i+i*naxis] = 1.0;
   b[lng+lng*naxis] = cas;
@@ -1608,7 +1713,7 @@ void	precess_wcs(wcsstruct *wcs, double yearin, double yearout)
       {
       val = 0.0;
       for (k=0; k<naxis; k++)
-        val += b[k+j*naxis]*c[i+k*naxis];
+        val += c[k+j*naxis]*b[i+k*naxis];
       *(at++) = val;
       }
 
@@ -1673,6 +1778,80 @@ void	precess(double yearin, double alphain, double deltain,
   *deltaout /= DEG;
 
   return;
+  }
+
+
+/********************************* b2j ***********************************/
+/*
+conver equatorial coordinates from equinox and epoch B1950 to equinox and
+epoch J2000 for extragalactic sources (from Aoki et al. 1983).
+*/
+void	b2j(double yearobs, double alphain, double deltain,
+		double *alphaout, double *deltaout)
+  {
+   int		i,j;
+   double	a[3] = {-1.62557e-6, -0.31919e-6, -0.13843e-6},
+		ap[3] = {1.245e-3, -1.580e-3, -0.659e-3},
+		m[6][6] = {
+  { 0.9999256782,     -0.0111820611,     -0.0048579477,
+    0.00000242395018, -0.00000002710663, -0.00000001177656},
+  { 0.0111820610,      0.9999374784,     -0.0000271765,
+    0.00000002710663,  0.00000242397878, -0.00000000006587},
+  { 0.0048579479,     -0.0000271474,      0.9999881997,
+    0.00000001177656, -0.00000000006582,  0.00000242410173},
+  {-0.000551,        -0.238565,           0.435739,
+    0.99994704,	     -0.01118251,        -0.00485767},
+  { 0.238514,        -0.002662,          -0.008541,
+    0.01118251,	      0.99995883,        -0.00002718},
+  {-0.435623,         0.012254,           0.002117,
+    0.00485767,      -0.00002714,         1.00000956}},
+ 		a1[3], r[3], ro[3], r1[3], r2[3], v1[3], v[3];
+   double		cai, sai, cdi, sdi, dotp, rmod, alpha, delta,
+			t1 = (yearobs - 1950.0)/100.0;
+
+  alphain *= PI/180.0;
+  deltain *= PI/180.0;
+  cai = cos(alphain);
+  sai = sin(alphain);
+  cdi = cos(deltain);
+  sdi = sin(deltain);
+  ro[0] = cdi*cai;
+  ro[1] = cdi*sai;
+  ro[2] = sdi;
+  dotp = 0.0;
+  for (i=0; i<3; i++)
+    {
+    a1[i] = a[i]+ap[i]*ARCSEC*t1;
+    dotp += a1[i]*ro[i];
+    }
+  for (i=0; i<3; i++)
+    {
+    r1[i] = ro[i] - a1[i] + dotp*ro[i];
+    r[i] = v[i] = v1[i] = 0.0;
+    }
+  for (j=0; j<6; j++)
+    for (i=0; i<6; i++)
+      {
+      if (j<3)
+        r[j] += m[j][i]*(i<3?r1[i]:v1[i-3]);
+      else
+         v[j-3] += m[j][i]*(i<3?r1[i]:v1[i-3]);
+      }
+  rmod = 0.0;
+  for (i=0; i<3; i++)
+    {
+    r2[i] = r[i]+v[i]*ARCSEC*(t1-0.5);
+    rmod += r2[i]*r2[i];
+    }
+  rmod = sqrt(rmod);
+  delta = asin(r2[2]/rmod);
+  alpha = acos(r2[0]/cos(delta)/rmod);
+  if (r2[1]<0)
+    alpha = 2*PI - alpha;
+  *alphaout = alpha*180.0/PI;
+  *deltaout = delta*180.0/PI;
+
+  return;			
   }
 
 
@@ -1837,5 +2016,36 @@ double  sextodegde(char *dms)
   return val;
   }
 
+
+/******************************** fmod_0_p360 *******************************/
+/*
+Fold input angle in the [0,+360[ domain.
+*/
+double  fmod_0_p360(double angle)
+  {
+  return angle>0.0? fmod(angle,360.0) : fmod(angle,360.0)+360.0;
+  }
+
+
+/******************************** fmod_m90_p90 *******************************/
+/*
+Fold input angle in the [-90,+90[ domain.
+*/
+double  fmod_m90_p90(double angle)
+  {
+  return angle>0.0? fmod(angle+90.0,180.0)-90.0 : fmod(angle-90.0,180.0)+90.0;
+  }
+
+
+/********************************* fcmp_0_p360 *******************************/
+/*
+Compare angles in the [0,+360[ domain: return 1 if anglep>anglem, 0 otherwise.
+*/
+int  fcmp_0_p360(double anglep, double anglem)
+  {
+   double dval = anglep - anglem;
+
+  return (int)((dval>0.0 && dval<180.0) || dval<-180.0);
+  }
 
 

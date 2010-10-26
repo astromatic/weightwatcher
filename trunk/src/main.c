@@ -1,18 +1,31 @@
 /*
- 				main.c
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*				main.c
 *
-*	Part of:	WeightWatcher
+* Command-line parsing.
 *
-*	Author:		E.BERTIN (IAP) C. MARMO (IAP)
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Contents:	Parsing of the command line.
+*	This file part of:	WeightWatcher
 *
-*	Last modify:	27/04/2007
+*	Copyright:		(C) 1997-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*				& Chiara Marmo -- IAP/CNRS
 *
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+*	License:		GNU General Public License
+*
+*	WeightWatcher is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+* 	(at your option) any later version.
+*	WeightWatcher is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with WeightWatcher. If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		26/10/2010
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -48,9 +61,11 @@ int	main(int argc, char *argv[])
 
   if (argc<2)
     {
-    fprintf(OUTPUT, "\n         %s  Version %s (%s)\n", BANNER,MYVERSION,DATE);
-    fprintf(OUTPUT, "\nby %s\n", COPYRIGHT);
-    fprintf(OUTPUT, "visit %s\n", WEBSITE);
+    fprintf(OUTPUT, "\n         %s  version %s (%s)\n", BANNER,MYVERSION,DATE);
+    fprintf(OUTPUT, "\nWritten by %s\n", AUTHORS);
+    fprintf(OUTPUT, "Copyright %s\n", COPYRIGHT);
+    fprintf(OUTPUT, "\nvisit %s\n", WEBSITE);
+    fprintf(OUTPUT, "\n%s\n", DISCLAIMER);
     error(EXIT_SUCCESS, "SYNTAX: ", SYNTAX);
     }
 

@@ -1,10 +1,35 @@
-# Main Makefile for WeightWatcher
-# Copyright (C) 2003-2009 Emmanuel Bertin & Chiara Marmo.
+#
+#				configure.ac
+#
+# Main Makefile. Process this file with automake to generate a Makefile
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#	This file part of:	WeightWatcher
+#
+#	Copyright:		(C) 2003-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+#				& Chiara Marmo -- IAP/CNRS
+#
+#	WeightWatcher is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+# 	(at your option) any later version.
+#	WeightWatcher is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	You should have received a copy of the GNU General Public License
+#	along with WeightWatcher.  If not, see <http://www.gnu.org/licenses/>.
+#
+#	Last modified:		26/10/2010
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
 dist_pkgdata_DATA	= xsl/ww.xsl
 EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYRIGHT \
-			  HISTORY INSTALL README THANKS \
+			  HISTORY INSTALL LICENSE README THANKS \
 			  acx_prog_cc_optim.m4 acx_urbi_resolve_dir.m4
 
 RPM_ROOTDIR 		= `rpmbuild --nobuild -E %_topdir`
