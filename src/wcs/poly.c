@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic WCS library
 *
-*	Copyright:		(C) 1998-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 1998-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/10/2010
+*	Last modified:		20/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -36,10 +36,15 @@
 #include	<stdlib.h>
 #include	<string.h>
 
-#include	"poly.h"
 #ifdef HAVE_ATLAS
-#include	ATLAS_LAPACK_H
+#include ATLAS_LAPACK_H
 #endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
+
+#include	"poly.h"
 
 #define	QCALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)calloc((size_t)(nel),sizeof(typ)))) \
@@ -72,7 +77,7 @@ INPUT   1D array containing the group for each parameter,
 OUTPUT  polystruct pointer.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 08/03/2003
+VERSION 30/08/2011
  ***/
 polystruct	*poly_init(int *group, int ndim, int *degree, int ngroup)
   {
@@ -81,7 +86,7 @@ polystruct	*poly_init(int *group, int ndim, int *degree, int ngroup)
    char		str[512];
    int		nd[POLY_MAXDIM];
    int		*groupt,
-		d,g,n,num,den;
+		d,g,n, num,den, dmax;
 
   QCALLOC(poly, polystruct, 1);
   if ((poly->ndim=ndim) > POLY_MAXDIM)
@@ -117,15 +122,17 @@ polystruct	*poly_init(int *group, int ndim, int *degree, int ngroup)
   poly->ncoeff = 1;
   for (g=0; g<ngroup; g++)
     {
-    if ((d=poly->degree[g]=*(degree++))>POLY_MAXDEGREE)
+    if ((dmax=poly->degree[g]=*(degree++))>POLY_MAXDEGREE)
       {
       sprintf(str, "The degree of the polynom (%d) exceeds the maximum\n"
 		"allowed one (%d)", poly->degree[g], POLY_MAXDEGREE);
       qerror("*Error*: ", str);
       }
 
-/*-- There are (n+d)!/(n!d!) coeffs per group, that is Prod_(i<=d) (n+i)/i */
-    for (num=den=1, n=nd[g]; d; num*=(n+d), den*=d--);
+/*-- There are (n+d)!/(n!d!) coeffs per group = Prod_(i<=d)(n+i)/Prod_(i<=d)i */
+    n = nd[g];
+    d = dmax>n? n: dmax;
+    for (num=den=1; d; num*=(n+dmax--), den*=d--);
     poly->ncoeff *= num/den;
     }
 
@@ -435,16 +442,16 @@ INPUT   Pointer to the (pseudo 2D) matrix of coefficients,
 OUTPUT  -.
 NOTES   -.
 AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-VERSION 26/10/2010
+VERSION 20/12/2011
  ***/
 void	poly_solve(double *a, double *b, int n)
   {
-
-#ifdef HAVE_ATLAS
+#if defined(HAVE_LAPACKE)
+  LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', n, 1, a, n, b, n);
+#elif defined(HAVE_ATLAS)
   clapack_dposv(CblasRowMajor, CblasUpper, n, 1, a, n, b, n);
 #else
-  if (cholsolve(a,b,n))
-    qerror("*Error*: singular matrix found ", "while deprojecting" );
+  cholsolve(a,b,n);
 #endif
 
   return;
@@ -452,7 +459,7 @@ void	poly_solve(double *a, double *b, int n)
 
 
 /****** cholsolve *************************************************************
-PROTO	void cholsolve(double *a, double *b, int n)
+PROTO	int cholsolve(double *a, double *b, int n)
 PURPOSE	Solve a system of linear equations, using Cholesky decomposition.
 INPUT	Pointer to the (pseudo 2D) matrix of coefficients,
 	pointer to the 1D column vector,

@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 1993-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		14/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -48,7 +48,7 @@
 #define		WCS_NGRIDPOINTS	12	/* Number of WCS grid points / axis */
 #define		WCS_NGRIDPOINTS2	(WCS_NGRIDPOINTS*WCS_NGRIDPOINTS)
 #define		WCS_INVMAXDEG	9	/* Maximum inversion polynom degree */
-#define		WCS_INVACCURACY	0.04	/* Maximum inversion error (pixels) */
+#define		WCS_INVACCURACY	0.001	/* Maximum inversion error (pixels) */
 #define		WCS_NRANGEPOINTS 32	/* Number of WCS range points / axis */
 
 /*-------------------------------- typedefs ---------------------------------*/
@@ -120,11 +120,15 @@ extern double		fmod_0_p360(double angle),
 				double *wcspos1, double *wcspos2),
 			wcs_jacobian(wcsstruct *wcs, double *pixpos,
 				double *jacob),
+			wcs_rawtoraw(wcsstruct *wcsin, wcsstruct *wcsout,
+				double *pixposin, double *pixposout,
+				double *jacob),
 			wcs_scale(wcsstruct *wcs, double *pixpos);
 
 extern int		celsys_to_eq(wcsstruct *wcs, double *wcspos),
 			eq_to_celsys(wcsstruct *wcs, double *wcspos),
 			fcmp_0_p360(double anglep, double anglem),
+			frame_wcs(wcsstruct *wcsin, wcsstruct *wcsout),
 			raw_to_red(wcsstruct *wcs,
 				double *pixpos, double *redpos),
 			raw_to_wcs(wcsstruct *wcs,
@@ -146,7 +150,6 @@ extern void		b2j(double yearobs, double alphain, double deltain,
 			init_wcs(wcsstruct *wcs),
 			init_wcscelsys(wcsstruct *wcs),
 			invert_wcs(wcsstruct *wcs),
-			frame_wcs(wcsstruct *wcsin, wcsstruct *wcsout),
 			j2b(double yearobs, double alphain, double deltain,
 				double *alphaout, double *deltaout),
 			precess(double yearin, double alphain, double deltain,
