@@ -1,0 +1,28 @@
+Apr 2007: Chiara v1.7.7 WCS .reg files accepted for single extension images.
+
+Apr 2007: Chiara v1.7.6 xml output added
+
+Dec 2006: Chiara v1.7.5 effective surface written in the headers
+
+Mar 2006: Emmanuel V1.7.04 intersection of polygons are flagged.
+
+Sep 2005: Chiara V1.7.01 trying to solve some problems for MEF .reg files
+	  Bug fixed. Only ds9 3.0 syntax is accepted!!!!
+
+Jan 2005: V1.7
+        - Support for ds9 3.0 polygons
+
+Jan 2003: V1.4
+        - MEF support
+        - First "GNU-style" release
+
+Sep 2000: V1.3
+        - Portability issues solved
+
+Nov 97: V1.2
+	- Handling of polygon data for masking, from SAOImage .reg files
+
+Sep 97: V1.1
+	- many bug fixes
+
+Aug 97: First 1.0 version
