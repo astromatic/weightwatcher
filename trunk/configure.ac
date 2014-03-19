@@ -7,7 +7,7 @@
 #
 #	This file part of:	WeightWatcher
 #
-#	Copyright:		(C) 2003-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2003-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 #				& Chiara Marmo -- IAP/CNRS
 #
 #	WeightWatcher is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with WeightWatcher.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		26/10/2010
+#	Last modified:		19/03/2014
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -30,10 +30,10 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(weightwatcher, 1.10, [bertin@iap.fr])
+AC_INIT(weightwatcher, 1.12, [marmo@iap.fr bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 date=`date +%Y-%m-%d`
 date2=`date +"%a %b %d %Y"`
@@ -50,55 +50,43 @@ sinclude(acx_urbi_resolve_dir.m4)
 # Display pakage and version number
 AC_MSG_RESULT([*********** Configuring:  $PACKAGE $VERSION ($date) **********])
 
-# Initialize the list of compilers to consider
-cclist="cc gcc"
-
 # Provide special option for choosing automatically the compilation flags.
-AC_MSG_CHECKING([if compilation flags are set automatically])
+AC_MSG_CHECKING([if compilation flags should be set automatically])
 AC_ARG_ENABLE(auto-flags,
-	[AC_HELP_STRING([--enable-auto-flags],
+	[AS_HELP_STRING([--enable-auto-flags],
 	[Let the configure script choose the compilation flags \
-(off by default)])],
-	use_autoflag="yes"
-	AC_MSG_RESULT([yes]),
-	use_autoflag="no"
-	AC_MSG_RESULT([no]))
+(off by default)])])
 
 # Provide special option for the Linux Intel C compiler
-AC_MSG_CHECKING([for Linux Intel C compiler mode])
+AC_MSG_CHECKING([whether we should use the INTEL compiler])
 AC_ARG_ENABLE(icc,
-	[AC_HELP_STRING([--enable-icc],
-	[Enable special mode for compilation with the Intel compiler \
-(off by default)])],
-        use_icc="yes"
-        cclist="icc $cclist"
+	[AS_HELP_STRING([--enable-icc],
+	[Use the Intel compiler (off by default)])],
+        CC="icc"
 	AC_MSG_RESULT([yes]),
-        use_icc="no"
 	AC_MSG_RESULT([no]))
 
 # Checks for programs.
-# GCC is chosen last because it is likely to yield less optimized code
-AC_PROG_CC([$cclist])
-# C Compiler: Check that it is ANSI C
-AM_PROG_CC_STDC
-# C Compiler: Check that it is POSIX-compliant
-AC_ISC_POSIX
-# Override automatic CFLAGS and LDFLAGS with those of user
-if test "$use_autoflag" = "yes"; then
+AC_LANG(C)
+
+AC_SEARCH_LIBS([strerror],[cposix])
+if test "$enable_auto_flags" = "yes"; then
   CFLAGS=""
-  LDFLAGS =""
+  LDFLAGS=""
   ACX_PROG_CC_OPTIM
 fi
+
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 
 # Checks for libraries.
+# Replace `main' with a function in -lm:
 AC_CHECK_LIB(m, sin)
 
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(stdlib.h string.h fcntl.h unistd.h sys/mman.h)
-if test $use_icc = "yes" -a $CC = "icc"; then
+if test "$enable_icc" = "yes"; then
   AC_CHECK_HEADERS(mathimf.h)
 fi
 
@@ -125,56 +113,49 @@ strpbrk strrchr strspn strstr strtol])
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-#AC_DEFINE(_FILE_OFFSET_BITS, 64, [off_t size])
-#AC_DEFINE(_LARGEFILE64_SOURCE, 1, [enable 64bit file pointers])
-
-# Set the data directory to a true absolute path
-datadir2=$(URBI_RESOLVE_DIR([$datadir]))
-
 # Provide a special option for the default XSLT URL
+with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_NAME/ww.xsl"
 AC_ARG_WITH(xsl_url,
-        [AC_HELP_STRING([--with-xsl_url=<default URL for XSLT filter>],
-        [Provide an alternative default URL of the XSLT filter])],
-    [xsl_url=$withval],
-    [xsl_url="file://$datadir2/$PACKAGE_NAME/ww.xsl"]
-    )
+	[AS_HELP_STRING([--with-xsl_url=<default URL for XSLT filter>],
+	[Provide an alternative default URL of the XSLT filter])])
 
-AC_DEFINE_UNQUOTED([XSL_URL], "$xsl_url",[Default URL of the XSLT filter])
+AC_DEFINE_UNQUOTED([XSL_URL], "$with_xsl_url",[Default URL of the XSLT filter])
 
-# Provide special option for gprof profiling
-AC_MSG_CHECKING([for gprof profiler mode])
-AC_ARG_ENABLE(gprof,
-        [AC_HELP_STRING([--enable-gprof],
-        [Enable special mode for compilation with the gprof profiler \
-(off by default)])],
-        use_gprof="yes"
-        AC_MSG_RESULT([yes]),
-        use_gprof="no"
-        AC_MSG_RESULT([no]))
+# Provide special option for profiling
+AC_MSG_CHECKING([for profiler mode])
+AC_ARG_ENABLE(profiling,
+	[AS_HELP_STRING([--enable-profiling],
+	[Enable special mode for profiling (off by default)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
 
 # Enable linking options for making the executable as portable as possible.
 AC_MSG_CHECKING([best linking option])
 AC_ARG_ENABLE(best-link,
-	[AC_HELP_STRING([--enable-best-link],
+	[AS_HELP_STRING([--enable-best-link],
 	[Choose the right combination of static and dynamic linking to make \
 the executable as portable as possible (off by default)])],
-	use_best="yes"
 	AC_MSG_RESULT([yes]),
-	use_best="no"
 	AC_MSG_RESULT([no]))
 
-if test "$use_gprof" = "yes"; then
-  if test "$use_icc" = "yes"; then
+# Compile with profiling option
+if test "$enable_profiling" = "yes"; then
+  if test "$enable_icc" = "yes"; then
     AM_CFLAGS="$AM_CFLAGS -pq"
   else
     AM_CFLAGS="$AM_CFLAGS -pg"
   fi
-  use_best="no"
+  enable_best_link="no"
 fi
 
 # "Best" linking option
-if test "$use_best" = "yes"; then
-  AM_LDFLAGS="-shared-libgcc -static-libtool-libs $AM_LDFLAGS"
+if test "$enable_best_link" = "yes"; then
+  if test "$enable_icc" = "yes"; then
+    AM_LDFLAGS="-static-intel -shared-libgcc \
+	-no-intel-extensions -avoid-version $AM_LDFLAGS"
+  else
+    AM_LDFLAGS="-shared-libgcc -avoid-version $AM_LDFLAGS"
+  fi
 fi
 
 # Display compiler and linker flags
